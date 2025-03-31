@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <title>图艺工坊</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<!--  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">-->
+  <link rel="stylesheet" th:href="@{/styles.css}">
   <style type="text/css">
   .container p a {
 	font-size: 24px;
@@ -22,8 +23,10 @@
   <br>
   <a href="{{ url_for('logout') }}">退出登录</a>&nbsp; &nbsp; &nbsp; &nbsp; <a th:href="@{/history}">查看历史记录</a></p>
 {% else %}
-<p align="center"><a href="{{ url_for('/register') }}">注册</a>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;<a href="{{ url_for('/login') }}">登录</a></p>
-{% endif %}<br>
+<!--<p align="center"><a href="{{ url_for('/register') }}">注册</a>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;<a href="{{ url_for('/login') }}">登录</a></p>-->
+  <p align="center"><a th:href="@{/register}">注册</a>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;
+    <a th:href="@{/login}">登录</a>
+  {% endif %}<br>
 <br>
 <br>
 <br>
@@ -37,7 +40,10 @@
 <div align="center">输出: </div>
 <div id="resultArea"></div>
 </div>
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+<!--<script src="{{ url_for('static', filename='script.js') }}"></script>-->
+<script th:src="@{/script.js}"></script>
 </body>
 </html>
 ml>-->
+
+
