@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='general.css') }}">
+    <style type="text/css">
+    .container a {
+	font-size: 24px;
+}
+    </style>
+</head>
+<body>
+<div class="container">
+<h1>注册</h1>
+<form method="post">
+    <label for="email">邮箱:</label>
+    <input type="text" id="email" name="email" required>
+
+  <label for="username">用户名:</label>
+    <input type="text" id="username" name="username" required>
+
+    <label for="password">密码:</label>
+    <input type="password" id="password" name="password" required>
+
+    <label for="password2">确认密码:</label>
+    <input type="password" id="password2" name="password2" required><br>
+
+    <button type="submit">注册</button>
+</form>
+<a href="{{ url_for('index') }}"><br>
+	<div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+<br>
+返回主页</a>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>图艺工坊</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style type="text/css">
+  .container p a {
+	font-size: 24px;
+}
+  .container p {
+	font-size: 24px;
+}
+  </style>
+</head>
+<body>
+<div class="container">
+<h1>图艺工坊</h1>
+{% if current_user.is_authenticated %}
+<p align="center">欢迎, {{ current_user.username }}!<br>
+  <br>
+  <a href="{{ url_for('logout') }}">退出登录</a>&nbsp; &nbsp; &nbsp; &nbsp; <a th:href="@{/history}">查看历史记录</a></p>
+{% else %}
+<p align="center"><a href="{{ url_for('/register') }}">注册</a>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;<a href="{{ url_for('/login') }}">登录</a></p>
+{% endif %}<br>
+<br>
+<br>
+<br>
+<div class="button-container">
+    <div align="center">
+      <button type="submit">提交</button>
+      <br>
+      <br>
+    </div>
+</div>
+<div align="center">输出: </div>
+<div id="resultArea"></div>
+</div>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+ml>-->
