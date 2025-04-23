@@ -22,14 +22,17 @@ public class StyleganService1 implements StyleganService {
     private final Path generatePath;
     private final Path weightsPath;
     private final Path outputDir;
+    private final Path pythonPath;
     @Autowired
     public StyleganService1(
             @Value("${file.stylegan.generate}") String generatePath,
             @Value("${file.stylegan.weight}") String weightsPath,
-            @Value("${file.upload-dir.stylegan.resImg}") String outputDir) {
+            @Value("${file.upload-dir.stylegan.resImg}") String outputDir,
+            @Value("${file.python}") String pythonPath) {
         this.generatePath = Paths.get(generatePath).toAbsolutePath().normalize();
         this.weightsPath = Paths.get(weightsPath).toAbsolutePath().normalize();
         this.outputDir = Paths.get(outputDir).toAbsolutePath().normalize();
+        this.pythonPath = Paths.get(pythonPath).toAbsolutePath().normalize();
     }
 
     @Override
@@ -59,12 +62,12 @@ public class StyleganService1 implements StyleganService {
 
         // 4. 构建完整命令
         String[] command = {
-                "python",
+                pythonPath.toString(),
                 pythonScript,
                 "--outdir=" + outdir,
                 "--seeds=" + seeds,
                 "--trunc=" + trunc,
-                "--network=" + weightsPath,
+                "--network=" + weightsPath+"/"+networkFile,
                 "--output-name=" + fileName
         };
         log.info("command:"+ Arrays.toString(command));

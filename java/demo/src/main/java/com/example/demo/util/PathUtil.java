@@ -20,15 +20,18 @@ public class PathUtil {
         return newFileName;
     }
 
-    public static String getNewFileName(String saveDir){
+    public static String getNewFileName(String saveDir,boolean need_suff){
         String extension = ".png";
 
         int index = 1;
         String newFileName;
         do {
-            newFileName = String.format("%08d", index) + extension;
+            if(need_suff)
+                newFileName = String.format("%08d", index) + extension;
+            else
+                newFileName = String.format("%08d", index);
             index++;
-        } while (Files.exists(Paths.get(saveDir, newFileName)));
+        } while (Files.exists(Paths.get(saveDir, newFileName+ extension)));
 
         return newFileName;
     }

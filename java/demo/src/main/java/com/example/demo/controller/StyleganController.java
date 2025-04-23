@@ -7,14 +7,17 @@ import com.example.demo.util.PathUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -35,7 +38,7 @@ public class StyleganController {
         this.resImgPath = Paths.get(resImgDir).toAbsolutePath().normalize();
     }
 
-    @GetMapping("/stylegan/gen")
+    @PostMapping("/stylegan/gen")
     public ResponseEntity<Map<String, Object>> genImage(
             @RequestParam("seed") int seed,
             @RequestParam("trunc") float trunc,
@@ -65,7 +68,7 @@ public class StyleganController {
             }
 
             // 4. 生成图片
-            String imgUrl = PathUtil.getNewFileName(resImgPath.toString());
+            String imgUrl = PathUtil.getNewFileName(resImgPath.toString(),false);
             String fileName = PathUtil.getFileName(imgUrl);
             StyleganBean styleganBean = new StyleganBean(seed, trunc, network, imgUrl,fileName);
             boolean success = styleganService.runStyleganScript(styleganBean);
@@ -77,9 +80,12 @@ public class StyleganController {
             }
 
             // 5. 返回成功响应
+            if (!imgUrl.endsWith(".png")) {
+                imgUrl += ".png";
+            }
             response.put("code", 200);
             response.put("msg", "图片生成成功");
-            response.put("imgUrl", imgUrl);
+            response.put("resImgUrl", imgUrl);
             return new ResponseEntity<>(response, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -87,6 +93,56 @@ public class StyleganController {
             response.put("code", 500);
             response.put("msg", "服务器内部错误");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @GetMapping("/stylegan/result")
+    public ResponseEntity<Resource> downloadImage(
+            @RequestParam String resImgUrl) throws IOException {
+
+        // 验证imageUrl是否有效
+        if (resImgUrl == null || resImgUrl.isEmpty()) {
+            throw new IllegalArgumentException("Image URL must not be empty");
+        }
+
+        // 从URL获取资源
+        String fileName = PathUtil.getFileName(resImgUrl);
+        Path path = Paths.get(resImgPath.toString()+"/"+fileName);
+        Resource resource;
+        try {
+            resource = new UrlResource(path.toUri());
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid image URL", e);
+        }
+
+        // 检查资源是否存在
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new RuntimeException("Could not read the image file");
+        }
+
+        // 检查文件大小（最大5MB）
+        long fileSize = resource.contentLength();
+        if (fileSize > 5 * 1024 * 1024) { // 5MB
+            throw new RuntimeException("Image file size exceeds the 5MB limit");
+        }
+
+        // 确定内容类型
+        String contentType = determineContentType(resImgUrl);
+
+        // 构建响应
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+    }
+
+    private String determineContentType(String imageUrl) {
+        if (imageUrl.toLowerCase().endsWith(".jpg") || imageUrl.toLowerCase().endsWith(".jpeg")) {
+            return "image/jpeg";
+        } else if (imageUrl.toLowerCase().endsWith(".png")) {
+            return "image/png";
+        } else {
+            // 默认返回二进制流
+            return "application/octet-stream";
         }
     }
 }
