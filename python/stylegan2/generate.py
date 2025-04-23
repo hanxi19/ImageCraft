@@ -43,6 +43,7 @@ def num_range(s: str) -> List[int]:
 @click.option('--noise-mode', help='Noise mode', type=click.Choice(['const', 'random', 'none']), default='const', show_default=True)
 @click.option('--projected-w', help='Projection result file', type=str, metavar='FILE')
 @click.option('--outdir', help='Where to save the output images', type=str, required=True, metavar='DIR')
+@click.option('--output-name', help='Custom name for the output image(s)', type=str, metavar='NAME')
 def generate_images(
     ctx: click.Context,
     network_pkl: str,
@@ -51,7 +52,8 @@ def generate_images(
     noise_mode: str,
     outdir: str,
     class_idx: Optional[int],
-    projected_w: Optional[str]
+    projected_w: Optional[str],
+    output_name: Optional[str]
 ):
     """Generate images using pretrained network pickle.
 

@@ -11,5 +11,6 @@ public class StyleganBean {
     private int seed;
     private float trunc;
     private int network;
-    private String imgUrl;
+    private String resImgUrl;
+    private String fileName;
 }
