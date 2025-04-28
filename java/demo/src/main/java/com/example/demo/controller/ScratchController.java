@@ -7,18 +7,26 @@ import com.example.demo.util.PathUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -70,12 +78,12 @@ public class ScratchController {
         }
 
         // 生成唯一文件名
-        String newFilename = PathUtil.getNewFileName(file,oriImgPath.toString());
+        String newFilename = PathUtil.getNewFileName(oriImgPath.toString(),false);
 
         try {
             // 保存文件
             // 提取文件名序号
-            String fileSequence = newFilename.substring(0, newFilename.lastIndexOf('.'));
+            String fileSequence = newFilename;
             // 在oriImgPath下创建名为fileSequence的文件夹
             Path oriImgDir = oriImgPath.resolve(fileSequence);
             Files.createDirectories(oriImgDir);
@@ -84,7 +92,7 @@ public class ScratchController {
             Path resImgDir = resImgPath.resolve(fileSequence);
             Files.createDirectories(resImgDir);
 
-            Path targetLocation = Paths.get(oriImgPath + "/" + fileSequence + "/" +newFilename);
+            Path targetLocation = Paths.get(oriImgPath + "/" + fileSequence + "/" +newFilename+".png");
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
             
@@ -92,7 +100,7 @@ public class ScratchController {
             // 构建响应
             response.put("code", 1);
             response.put("msg", "上传成功");
-            response.put("oriImgUrl", "/scratch/origin_image/" + fileSequence + "/" + newFilename);
+            response.put("oriImgUrl", "/scratch/origin_image/" + fileSequence + "/" + newFilename+".png");
 
             return ResponseEntity.ok(response);
         } catch (IOException e) {
@@ -104,9 +112,9 @@ public class ScratchController {
     }
 
     @PostMapping("/scratch/dispose")
-    public ResponseEntity<Map<String, Object>> disposeImage(@RequestParam("oriImgUrl") String oriImgUrl){
+    public ResponseEntity<Map<String, Object>> disposeImage(@RequestBody Map<String, String> request){
         Map<String, Object> response = new HashMap<>();
-
+        String oriImgUrl = request.get("oriImgUrl");
         try {
             // 获取请求参数
             if (oriImgUrl == null || oriImgUrl.isEmpty()) {
@@ -148,6 +156,79 @@ public class ScratchController {
             response.put("msg", "服务器内部错误");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+    @PostMapping("/scratch/download")
+    public ResponseEntity<?> downloadImage(@RequestBody Map<String, String> request){
+        String resImgUrl = request.get("resImgUrl");
+        try {
+            // 检查参数是否为空
+            if (resImgUrl == null || resImgUrl.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "code", 0,
+                        "msg", "参数 resImgUrl 不能为空"
+                ));
+            }
+
+            // 构造图片文件路径
+            String imgDir = PathUtil.getFileName(resImgUrl);
+            String image = resImgPath.toString()+"/"+imgDir+"/"+"final_output"+"/"+imgDir+".png";
+            Path imagePath = Paths.get(image).toAbsolutePath().normalize();
+            File imageFile = imagePath.toFile();
+
+            // 检查文件是否存在
+            if (!imageFile.exists() || !imageFile.isFile()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                        "code", 0,
+                        "msg", "图片文件不存在"
+                ));
+            }
+
+//            // 返回图片文件流
+//            ResponseEntity<?> response = ResponseEntity.ok()
+//            .header("Content-Disposition", "attachment; filename=\"" + imageFile.getName() + "\"")
+//            .contentType(Files.probeContentType(imagePath) != null ?
+//                    MediaType.parseMediaType(Files.probeContentType(imagePath)) :
+//                    MediaType.APPLICATION_OCTET_STREAM)
+//            .body(new InputStreamResource(new FileInputStream(imageFile)));
+//
+//            // 删除文件夹及其内容
+//            deleteDirectory(Paths.get(resImgPath.toString(), imgDir));
+//            deleteDirectory(Paths.get(oriImgPath.toString(), imgDir));
+//
+//            return response;
+
+             // 返回图片文件流
+             return ResponseEntity.ok()
+                     .header("Content-Disposition", "attachment; filename=\"" + imageFile.getName() + "\"")
+                     .contentType(Files.probeContentType(imagePath) != null ?
+                             MediaType.parseMediaType(Files.probeContentType(imagePath)) :
+                             MediaType.APPLICATION_OCTET_STREAM)
+                     .body(new InputStreamResource(new FileInputStream(imageFile)));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "code", 0,
+                    "msg", "服务器内部错误"
+            ));
+        }
+    }
+
+    // 删除文件夹及其内容
+    private void deleteDirectory(Path directory) throws IOException {
+        Files.walkFileTree(directory, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file); // 删除文件
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir); // 删除空文件夹
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }
 

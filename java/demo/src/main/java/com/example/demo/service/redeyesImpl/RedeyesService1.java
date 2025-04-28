@@ -1,8 +1,11 @@
-package com.example.demo.service.scratchImpl;
+package com.example.demo.service.redeyesImpl;
 
-import com.example.demo.pojo.ScratchBean;
-import com.example.demo.service.ScratchService;
+import com.example.demo.pojo.RedeyesBean;
+import com.example.demo.service.RedeyesService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,40 +14,39 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 @Service
 @Slf4j
-public class ScratchService1 implements ScratchService {
-    private final Path pythonPath;
+public class RedeyesService1 implements RedeyesService {
     private final Path runScriptPath;
     private final Path root;
+    private final Path oriImgDir;
+    private final Path resImgDir;
     @Autowired
-    public ScratchService1(
-            @Value("${file.python}") String pythonPath,
-            @Value("${file.scratch.run}") String runScriptPath,
-            @Value("${file.root-dir}") String root) {
-        this.pythonPath = Paths.get(pythonPath).toAbsolutePath().normalize();
+    public RedeyesService1(
+            @Value("${file.redeyes.del}") String runScriptPath,
+            @Value("${file.root-dir}") String root,
+            @Value("${file.upload-dir.redeyes.oriImg}") String oriImgDir,
+            @Value("${file.upload-dir.redeyes.resImg}") String resImgDir) {
         this.runScriptPath = Paths.get(runScriptPath).toAbsolutePath().normalize();
         this.root = Paths.get(root).toAbsolutePath().normalize();
+        this.oriImgDir = Paths.get(oriImgDir).toAbsolutePath().normalize();
+        this.resImgDir = Paths.get(resImgDir).toAbsolutePath().normalize();
     }
     @Override
-    public boolean runStyleganScript(ScratchBean scratchBean) {
+    public boolean runRedeyesScript(RedeyesBean redeyesBean) {
+        String coords=redeyesBean.convertEyesToString();
         // 构建 Python 命令
         String[] command = {
-            "cmd.exe", "/c", // 使用 cmd 执行命令
+                "cmd.exe", "/c", // 使用 cmd 执行命令
 //            "E:\\develop\\web\\ImageCraft\\python\\Bringing-Old-Photos-Back-to-Life\\venv\\Scripts\\activate && " + // 激活虚拟环境
-            root+"/python/Bringing-Old-Photos-Back-to-Life/venv/Scripts/activate &&",
-            // pythonPath.toString(),
-            "python",
-            runScriptPath.toString(),
-            "--output_folder" , scratchBean.getResImageUrl(),
-            "--input_folder" , scratchBean.getOriImageUrl(),
-            "--GPU", "0",
-            "--with_scratch"
-    };
+                "conda activate E:\\develop\\web\\ImageCraft\\python\\imgc && ",
+                // pythonPath.toString(),
+                "python",
+                runScriptPath.toString(),
+                "--output" , redeyesBean.getResImageUrl(),
+                "--input" , redeyesBean.getOriImageUrl(),
+                "--coords" , coords
+        };
         log.info("command:"+ Arrays.toString(command));
 
         try {

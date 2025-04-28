@@ -21,15 +21,15 @@ public class PathUtil {
     }
 
     public static String getNewFileName(String saveDir,boolean need_suff){
-        String extension = ".png";
+        String extension = "";
+        if(need_suff){
+            extension = ".png";
+        }
 
         int index = 1;
         String newFileName;
         do {
-            if(need_suff)
-                newFileName = String.format("%08d", index) + extension;
-            else
-                newFileName = String.format("%08d", index);
+            newFileName = String.format("%08d", index) + extension;
             index++;
         } while (Files.exists(Paths.get(saveDir, newFileName+ extension)));
 
