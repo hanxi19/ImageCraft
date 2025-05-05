@@ -171,6 +171,41 @@ def to_normalized_coords(x1, y1, x2, y2, img):
 
     return norm_x, norm_y, norm_w, norm_h, n
 
+def remove_redeye_with_coords(x, y, w, h, n):
+    """
+    根据归一化坐标去除红眼。
+    :param x: 左上角 x 坐标（归一化）
+    :param y: 左上角 y 坐标（归一化）
+    :param w: 宽度（归一化）
+    :param h: 高度（归一化）
+    :param n: 图像的宽高比归一化系数（通常为1）
+    """
+    global img, ans
+    img2 = ans.astype(np.int32)  # 转换数据类型方便进行运算
+    H, S, I = rgb2hsi(img2[:, :, 2], img2[:, :, 1], img2[:, :, 0])
+
+    # 将归一化坐标转换为实际像素坐标
+    height, width = img.shape[:2]
+    min_x = int(x * width)
+    min_y = int(y * height)
+    rect_width = int(w * width)
+    rect_height = int(h * height)
+
+    # 按照红眼定义在指定区域进行去红眼处理
+    for i in range(min_y, min_y + rect_height + 1):
+        for j in range(min_x, min_x + rect_width + 1):
+            if (H[i, j] < math.pi / 4) or H[i, j] > math.pi * 7 / 4:
+                if S[i, j] > 0.25:
+                    S[i, j] = 0
+
+    R, G, B = hsi2rgb(H, S, I)
+    # 构造去红眼的结果影像
+    mid = np.zeros([R.shape[0], R.shape[1], 3])
+    mid[:, :, 0] = B
+    mid[:, :, 1] = G
+    mid[:, :, 2] = R
+    ans = mid.astype(np.uint8)  # 转换数据类型方便结果展示与保存
+
 # if __name__ == '__main__':
 #     # 示例调用 remove_redeye_with_coords 函数
 #     # 假设归一化坐标为 (0.3, 0.3, 0.2, 0.2, 1)
@@ -179,19 +214,57 @@ def to_normalized_coords(x1, y1, x2, y2, img):
 #     x,y,w,h,n=to_normalized_coords(67,116,147,149,img)
 #     remove_redeye_with_coords(x,y,w,h,n)
 
+# if __name__ == '__main__':
+#     # 使用 argparse 解析命令行参数
+#     parser = argparse.ArgumentParser(description="去除图片中的红眼")
+#     parser.add_argument('--x', type=float, required=True, help="左上角 x 坐标（归一化）")
+#     parser.add_argument('--y', type=float, required=True, help="左上角 y 坐标（归一化）")
+#     parser.add_argument('--w', type=float, required=True, help="宽度（归一化）")
+#     parser.add_argument('--h', type=float, required=True, help="高度（归一化）")
+#     parser.add_argument('--n', type=float, default=1, help="归一化系数（通常为1）")
+#     parser.add_argument('--input', type=str, required=True, help="输入图像路径")
+#     parser.add_argument('--output', type=str, required=True, help="输出图像路径")
+
+#     args = parser.parse_args()
+
+#     # 调用去红眼函数
+#     remove_redeye_with_coords(args.x, args.y, args.w, args.h, args.n, args.input, args.output)
+
 if __name__ == '__main__':
     # 使用 argparse 解析命令行参数
     parser = argparse.ArgumentParser(description="去除图片中的红眼")
-    parser.add_argument('--x', type=float, required=True, help="左上角 x 坐标（归一化）")
-    parser.add_argument('--y', type=float, required=True, help="左上角 y 坐标（归一化）")
-    parser.add_argument('--w', type=float, required=True, help="宽度（归一化）")
-    parser.add_argument('--h', type=float, required=True, help="高度（归一化）")
-    parser.add_argument('--n', type=float, default=1, help="归一化系数（通常为1）")
     parser.add_argument('--input', type=str, required=True, help="输入图像路径")
     parser.add_argument('--output', type=str, required=True, help="输出图像路径")
+    parser.add_argument('--coords', type=str, required=True, help="红眼区域的矩形框列表，格式为 x1,y1,w1,h1,n1;x2,y2,w2,h2,n2;...")
 
     args = parser.parse_args()
 
-    # 调用去红眼函数
-    remove_redeye_with_coords(args.x, args.y, args.w, args.h, args.n, args.input, args.output)
+    # 检查输入图像路径是否存在
+    img = cv2.imread(args.input)
+    if img is None:
+        raise ValueError(f"输入图像路径无效：{args.input}")
 
+    ans = img.copy()
+
+    # 解析矩形框参数
+    try:
+        coords = args.coords.split(';')
+        rects = []
+        for coord in coords:
+            values = list(map(float, coord.split(',')))
+            if len(values) != 5:
+                raise ValueError(f"矩形框参数格式错误：{coord}")
+            rects.append(values)
+    except Exception as e:
+        raise ValueError(f"解析矩形框参数失败：{e}")
+
+    # 遍历每个矩形框并执行去红眼操作
+    for rect in rects:
+        x, y, w, h, n = rect
+        if not (0 <= x <= 1 and 0 <= y <= 1 and 0 <= w <= 1 and 0 <= h <= 1):
+            raise ValueError(f"矩形框坐标超出范围（必须为归一化坐标 0-1）：{rect}")
+        remove_redeye_with_coords(x, y, w, h, n)
+
+    # 保存结果图像
+    cv2.imwrite(args.output, ans)
+    print(f"去红眼处理完成，结果已保存到：{args.output}")
