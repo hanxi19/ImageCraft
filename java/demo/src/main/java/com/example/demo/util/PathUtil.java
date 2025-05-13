@@ -35,6 +35,18 @@ public class PathUtil {
 
         return newFileName;
     }
+    public static String getNewFileName(String saveDir){
+        String extension = ".png";
+
+        int index = 1;
+        String newFileName;
+        do {
+            newFileName = String.format("%08d", index) + extension;
+            index++;
+        } while (Files.exists(Paths.get(saveDir, newFileName)));
+
+        return newFileName;
+    }
 
     public static String getFileName(String url){
         String fileName = Paths.get(url).getFileName().toString();  // 直接获取文件名

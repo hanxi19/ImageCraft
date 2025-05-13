@@ -2,6 +2,34 @@ import argparse
 from PIL import Image
 import torch
 import torchvision.transforms as T
+from PIL import Image
+
+def resize_image(image_path, output_path, target_size):
+    """
+    将图片等比缩放到指定的分辨率，尽量保证图片质量，并删除黑色背景。
+    
+    :param image_path: 输入图片路径
+    :param output_path: 输出图片路径
+    :param target_size: 目标分辨率 (宽, 高)
+    """
+    with Image.open(image_path) as img:
+        # 获取原始宽高
+        original_width, original_height = img.size
+        target_width, target_height = target_size
+
+        # 计算等比缩放比例
+        scale = min(target_width / original_width, target_height / original_height)
+
+        # 计算新的宽高
+        new_width = int(original_width * scale)
+        new_height = int(original_height * scale)
+
+        # 缩放图片
+        resized_img = img.resize((new_width, new_height), Image.LANCZOS)
+
+        # 保存结果（直接保存缩放后的图片，无黑色背景）
+        resized_img.save(output_path, quality=95)  # 设置高质量保存
+
 
 
 parser = argparse.ArgumentParser(description='Test inpainting')
@@ -36,9 +64,14 @@ def main():
     generator_state_dict = torch.load(args.checkpoint)['G']
     generator.load_state_dict(generator_state_dict, strict=True)
 
+    resize_image(args.image, args.image, (256, 256))
+
     # load image and mask
     image = Image.open(args.image)
     mask = Image.open(args.mask)
+    # 等比缩放 mask 到与 image 相同的分辨率
+    if mask.size != image.size:
+        mask = mask.resize(image.size, Image.NEAREST)
 
     # prepare input
     image = T.ToTensor()(image)
