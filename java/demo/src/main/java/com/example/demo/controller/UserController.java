@@ -1,19 +1,18 @@
 package com.example.demo.controller;
+
 import com.example.demo.pojo.User;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.demo.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.ui.Model;
-import java.util.Map;
-import java.util.HashMap;
-
-
-import com.example.demo.repository.UserRepository;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class UserController {

@@ -1,9 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.pojo.RedeyesBean;
-import com.example.demo.pojo.ScratchBean;
 import com.example.demo.service.RedeyesService;
-import com.example.demo.service.ScratchService;
 import com.example.demo.util.PathUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
