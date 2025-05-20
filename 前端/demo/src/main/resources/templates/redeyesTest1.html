@@ -348,8 +348,22 @@
             background-color: rgba(67, 97, 238, 0.08);
         }
 
-        #canvas {
+        /* #canvas {
             width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            cursor: crosshair;
+        } */
+
+        .canvas-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            text-align: center;
+        }
+        #canvas {
+            display: inline-block;
+            max-width: 100%;
+            height: auto;
             border-radius: var(--border-radius);
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
             cursor: crosshair;
@@ -526,7 +540,9 @@
         <div class="processing-section">
             <h3><i class="fas fa-draw-polygon"></i> 标记红眼区域</h3>
             <p class="instruction">在图片上拖动鼠标绘制矩形框标记红眼区域</p>
-            <canvas id="canvas"></canvas>
+            <div class="canvas-wrapper">
+                <canvas id="canvas"></canvas>
+            </div>
             <div style="margin-top: 20px;">
                 <button id="processButton" class="btn" disabled>
                     <i class="fas fa-magic"></i> 开始处理
@@ -580,7 +596,7 @@
     // 显示状态消息
     function showStatus(element, message, style = '') {
         initStatus(element);
-        element.classList.add(style);
+        if (style) element.classList.add(style); // 只在 style 非空时添加
         element.innerHTML = `
                 <i class="fas fa-spinner fa-pulse"></i>
                 <span>${message}</span>
@@ -666,6 +682,19 @@ fileInput.addEventListener('change', async (event) => {
 });
 
     // 加载图片到画布
+    // function loadImage(url) {
+    //     img = new Image();
+    //     img.onload = () => {
+    //         canvas.width = img.width;
+    //         canvas.height = img.height;
+    //         ctx = canvas.getContext('2d');
+    //         ctx.drawImage(img, 0, 0);
+    //         processButton.disabled = false;
+    //         canvas.style.display = 'block';
+    //     };
+    //     img.onerror = () => showError(uploadStatus, '图片加载失败');
+    //     img.src = url;
+    // }
     function loadImage(url) {
         img = new Image();
         img.onload = () => {
@@ -681,12 +710,48 @@ fileInput.addEventListener('change', async (event) => {
     }
 
     // 画布绘制逻辑
-    function handleCanvasInteraction() {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
+    // function handleCanvasInteraction() {
+    //     const rect = canvas.getBoundingClientRect();
+    //     const scaleX = canvas.width / rect.width;
+    //     const scaleY = canvas.height / rect.height;
 
+    //     canvas.addEventListener('mousedown', (e) => {
+    //         isDrawing = true;
+    //         startX = (e.clientX - rect.left) * scaleX;
+    //         startY = (e.clientY - rect.top) * scaleY;
+    //     });
+
+    //     canvas.addEventListener('mousemove', (e) => {
+    //         if (!isDrawing) return;
+    //         const currentX = (e.clientX - rect.left) * scaleX;
+    //         const currentY = (e.clientY - rect.top) * scaleY;
+
+    //         ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //         ctx.drawImage(img, 0, 0);
+    //         drawRect(startX, startY, currentX - startX, currentY - startY);
+    //     });
+
+    //     canvas.addEventListener('mouseup', (e) => {
+    //         if (!isDrawing) return;
+    //         isDrawing = false;
+    //         const endX = (e.clientX - rect.left) * scaleX;
+    //         const endY = (e.clientY - rect.top) * scaleY;
+
+    //         const normalizedRect = [
+    //             startX / canvas.width,
+    //             startY / canvas.height,
+    //             (endX - startX) / canvas.width,
+    //             (endY - startY) / canvas.height
+    //         ];
+    //         rectangles.push(normalizedRect);
+    //         redrawCanvas();
+    //     });
+    // }
+    function handleCanvasInteraction() {
         canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
             isDrawing = true;
             startX = (e.clientX - rect.left) * scaleX;
             startY = (e.clientY - rect.top) * scaleY;
@@ -694,6 +759,9 @@ fileInput.addEventListener('change', async (event) => {
 
         canvas.addEventListener('mousemove', (e) => {
             if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
             const currentX = (e.clientX - rect.left) * scaleX;
             const currentY = (e.clientY - rect.top) * scaleY;
 
@@ -705,6 +773,9 @@ fileInput.addEventListener('change', async (event) => {
         canvas.addEventListener('mouseup', (e) => {
             if (!isDrawing) return;
             isDrawing = false;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
             const endX = (e.clientX - rect.left) * scaleX;
             const endY = (e.clientY - rect.top) * scaleY;
 
@@ -775,12 +846,26 @@ fileInput.addEventListener('change', async (event) => {
 
     function showProcessedImage(url) {
         const container = document.getElementById('processedImageContainer');
+        // 设置宽高和canvas一致
         container.innerHTML = `
-                <img src="${url}" class="result-image" alt="处理结果">
-            `;
+            <img src="${url}" 
+                class="result-image" 
+                alt="处理结果"
+                style="width: ${canvas.width}px; height: ${canvas.height}px; max-width: 100%;"/>
+        `;
         downloadButton.href = url;
         downloadButton.download = `redeye_removal_${Date.now()}.png`;
     }
+
+    downloadButton.addEventListener('click', () => {
+        if (!downloadButton.href) return;
+        const a = document.createElement('a');
+        a.href = downloadButton.href;
+        a.download = downloadButton.download || 'processed_image.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
 
     // 初始化画布交互
     handleCanvasInteraction();
