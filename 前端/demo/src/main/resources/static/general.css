@@ -1,0 +1,180 @@
+/* 样式重置，确保元素在不同浏览器中的默认样式一致 */
+body, h1, h2, p, ul, li, form, div, label, input, select, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* 设置页面主体样式 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+    transition: background-color 0.3s ease; /* 添加过渡效果 */
+}
+
+/* 容器样式 */
+.container {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+}
+
+/* 标题样式 */
+h1 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+}
+
+/* 表单样式 */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+label {
+    font-weight: bold;
+    color: #2c3e50;
+    text-align: left;
+}
+
+input[type="text"],
+input[type="password"] {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    background-color: #f9f9f9;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+/* 选择器样式 */
+select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 输入框样式 */
+input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 按钮样式 */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"] {
+    padding: 0.75rem;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #2980b9;
+}
+
+/* 提交按钮外层容器 */
+#inputForm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* 左对齐 */
+}
+
+/* 输出区域样式 */
+#resultArea {
+    margin-top: 20px;
+}
+
+/* 如果有结果，显示结果 */
+#resultArea p {
+    font-weight: bold;
+    color: #28a745;
+}
+
+/* 点击特效 */
+.tooltip {
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    z-index: 100;
+    transition: opacity 0.5s;
+}
+
+/* 泡泡动画 */
+.bubble {  
+    position: absolute;  
+    width: 50px;  /* 增加宽度 */
+    height: 50px; /* 增加高度 */
+    border-radius: 50%;  
+    background-color: rgba(255, 255, 255, 0.8); /* 增加不透明度 */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* 添加阴影效果 */
+    animation: float 5s infinite ease-in-out;  
+}
+
+@keyframes float {  
+    0%, 100% {  
+        transform: translateY(0);  
+    }  
+    50% {  
+        transform: translateY(-20%);  
+    }  
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+    .container {
+        padding: 1.5rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="password2"] {
+        padding: 0.5rem;
+    }
+
+    button[type="submit"] {
+        padding: 0.5rem;
+    }
+}

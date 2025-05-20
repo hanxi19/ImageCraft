@@ -1,0 +1,217 @@
+/* 样式重置，确保元素在不同浏览器中的默认样式一致 */
+body, h1, h2, p, ul, li, form, div, label, input, select, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+.container1 {
+    display: flex;
+    gap: 40px;
+    margin-top: 40px;
+    background-color: lightgray;
+}
+
+.container2 {
+    display: flex;
+    gap: 40px;
+    margin-top: 40px;
+}
+
+.text-column {
+    flex: 1;
+    min-width: 300px;
+    display: flex;          /* 启用弹性布局 */
+    flex-direction: column; /* 垂直排列子元素 */
+    justify-content: center; /* 垂直居中 */
+    align-items: center;     /* 水平居中 */
+}
+
+.image-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.btn {
+    font-size: 1.2em;
+    padding: 5px 4px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* 可选：添加悬停效果 */
+.btn:hover {
+    background-color: #45a049;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container1 {
+        flex-direction: column;
+    }
+
+    .text-column, .image-column {
+        min-width: auto;
+    }
+
+    .image-container {
+        height: 180px;
+    }
+}
+/* 设置页面主体样式 */
+body {
+    background-color: #f4f4f4;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*min-height: 1000vh;*/
+    margin: 0;
+    transition: background-color 0.3s ease; /* 添加过渡效果 */
+    padding-top: 80px; /* 为固定导航栏留出空间 */
+}
+
+/* 导航栏样式 */
+.fixed-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    padding: 10px 0;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+/*容器样式*/
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 1250px;
+}
+
+/* 标题样式 */
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+}
+
+/* 输入组样式 */
+.input-group {
+    margin-bottom: 15px;
+}
+
+/* 标签样式 */
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* 选择器样式 */
+select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 输入框样式 */
+input[type="number"] {
+    width: 310%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 按钮样式 */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"] {
+    background-color: #28a745;
+    color: #fff;
+    margin-right: 10px;
+}
+
+button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+/* 提交按钮外层容器 */
+#inputForm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* 左对齐 */
+}
+
+/* 输出区域样式 */
+#resultArea {
+    margin-top: 20px;
+}
+
+/* 如果有结果，显示结果 */
+#resultArea p {
+    font-weight: bold;
+    color: #28a745;
+}
+
+/* 点击特效 */
+.tooltip {
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    z-index: 100;
+    transition: opacity 0.5s;
+}
+
+/* 泡泡动画 */
+.bubble {
+    position: absolute;
+    width: 50px;  /* 增加宽度 */
+    height: 50px; /* 增加高度 */
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.8); /* 增加不透明度 */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* 添加阴影效果 */
+    animation: float 5s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20%);
+    }
+}

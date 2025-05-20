@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片格式转换工具</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/homee.css}" />
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #6b85f1;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --warning-color: #ffbe0b;
+            --danger-color: #ff5a5f;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .main-container {
+            margin-right: 20px; /* 减少右侧边距 */
+            margin-left: 20px; /* 增加左侧边距 */
+            max-width: calc(100%); /* 动态计算最大宽度 */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            text-align: center;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+            padding-bottom: 10px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--success-color));
+            border-radius: 2px;
+        }
+
+        .intro-text {
+            color: var(--gray-color);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .drop-area {
+            border: 2px dashed var(--gray-color);
+            border-radius: var(--border-radius);
+            padding: 40px 20px;
+            text-align: center;
+            margin: 25px 0;
+            cursor: pointer;
+            transition: var(--transition);
+            background-color: rgba(67, 97, 238, 0.03);
+        }
+
+        .drop-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.08);
+        }
+
+        .drop-area.highlight {
+            border-color: var(--success-color);
+            background-color: rgba(76, 201, 240, 0.08);
+        }
+
+        .drop-area i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .drop-area p {
+            margin: 10px 0;
+            color: var(--gray-color);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .btn:disabled {
+            background-color: #b0b0b0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            box-shadow: 0 4px 8px rgba(76, 201, 240, 0.2);
+        }
+
+        .btn-success:hover {
+            background-color: #3aa8d8;
+            box-shadow: 0 6px 12px rgba(76, 201, 240, 0.25);
+        }
+
+        .format-options {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+        }
+
+        .format-options label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            transition: var(--transition);
+        }
+
+        select:focus, input[type="range"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .jpeg-options {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #qualityValue {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        #preview {
+            max-width: 100%;
+            margin-top: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .status i {
+            margin-right: 10px;
+        }
+
+        .status.success {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: #007a99;
+            border-left-color: var(--success-color);
+        }
+
+        .status.error {
+            background-color: rgba(255, 90, 95, 0.1);
+            color: #cc0000;
+            border-left-color: var(--danger-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+
+
+</head>
+<body>
+<nav class="fixed-nav">
+    <div class="nav-container">
+        <!-- 左侧标题 -->
+        <h2>ImageCraft 图艺工坊</h2>
+
+        <!-- 右侧登录注册 -->
+        <div class="auth-links">
+            <a th:href="@{/changepassword}">修改密码</a>
+            <a th:href="@{/login}">退出登录</a>
+        </div>
+    </div>
+</nav>
+
+<!-- 左侧功能导航 -->
+
+<div class="features-container">
+    <nav class="features-nav">
+        <a href="Picture_croppingmem" class="feature-btn">
+            <span class="btn-text">图片裁剪</span>
+        </a>
+        <a href="Compressmem" class="feature-btn">
+            <span class="btn-text">图片压缩</span>
+        </a>
+        <a href="Conversionmem" class="feature-btn">
+            <span class="btn-text">格式转换</span>
+        </a>
+        <a href="Test_Addedmem" class="feature-btn">
+            <span class="btn-text">添加文字</span>
+        </a>
+        <a href="GIFmem" class="feature-btn">
+            <span class="btn-text">生成GIF</span>
+        </a>
+        <a href="scratchTest3" class="feature-btn">
+            <span class="btn-text">图片去划痕</span>
+        </a>
+        <a href="redeyesTest1" class="feature-btn">
+            <span class="btn-text">图片去红眼</span>
+        </a>
+        <a href="deepfill" class="feature-btn">
+            <span class="btn-text">水印与物体去除</span>
+        </a>
+        <a href="stylegabtest2" class="feature-btn">
+            <span class="btn-text">图片生成</span>
+        </a>
+        <a href="denoisingTest" class="feature-btn">
+            <span class="btn-text">图片去噪点</span>
+        </a>
+    </nav>
+</div>
+
+<!-- 功能内容区 -->
+<div class="main-container">
+    <h1>图片格式转换工具</h1>
+    <p class="intro-text">轻松转换图片格式，支持多种输出选项</p>
+
+    <div class="drop-area" id="dropArea">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>拖放图片文件到这里</p>
+        <p>或</p>
+        <button id="selectBtn" class="btn">
+            <i class="fas fa-folder-open"></i> 选择文件
+        </button>
+        <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div class="format-options">
+        <label for="formatSelect">转换为格式:</label>
+        <select id="formatSelect">
+            <option value="jpeg">JPEG</option>
+            <option value="png">PNG</option>
+            <option value="webp">WebP</option>
+            <option value="bmp">BMP</option>
+            <option value="gif">GIF</option>
+        </select>
+
+        <div id="jpegOptions" class="jpeg-options">
+            <label for="jpegQuality">JPEG质量:</label>
+            <div class="range-container">
+                <input type="range" id="jpegQuality" min="0" max="100" value="80">
+                <span id="qualityValue">80</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="button-group">
+        <button id="convertBtn" class="btn" disabled>
+            <i class="fas fa-exchange-alt"></i> 转换图片
+        </button>
+        <button id="downloadBtn" class="btn btn-success" disabled>
+            <i class="fas fa-download"></i> 下载图片
+        </button>
+    </div>
+
+    <div class="status" id="status">
+        <i class="fas fa-info-circle"></i>
+        <span>请选择要转换的图片文件</span>
+    </div>
+
+    <img id="preview" alt="图片预览">
+</div>
+<script>
+    // 获取DOM元素
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const selectBtn = document.getElementById('selectBtn');
+    const convertBtn = document.getElementById('convertBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const formatSelect = document.getElementById('formatSelect');
+    const jpegOptions = document.getElementById('jpegOptions');
+    const jpegQuality = document.getElementById('jpegQuality');
+    const qualityValue = document.getElementById('qualityValue');
+    const preview = document.getElementById('preview');
+    const statusEl = document.getElementById('status');
+
+    let originalFile = null;
+    let convertedBlob = null;
+
+    // 显示JPEG质量选项
+    function updateFormatOptions() {
+        if (formatSelect.value === 'jpeg') {
+            jpegOptions.style.display = 'block';
+        } else {
+            jpegOptions.style.display = 'none';
+        }
+    }
+
+    // 初始化
+    updateFormatOptions();
+
+    // 事件监听器
+    formatSelect.addEventListener('change', updateFormatOptions);
+
+    jpegQuality.addEventListener('input', function() {
+        qualityValue.textContent = this.value;
+    });
+
+    selectBtn.addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length) {
+            handleFile(e.target.files[0]);
+        }
+    });
+
+    // 拖放区域事件
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+        dropArea.classList.add('highlight');
+    }
+
+    function unhighlight() {
+        dropArea.classList.remove('highlight');
+    }
+
+    dropArea.addEventListener('drop', function(e) {
+        const dt = e.dataTransfer;
+        const file = dt.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleFile(file);
+        } else {
+            statusEl.textContent = '请选择有效的图片文件';
+        }
+    }, false);
+
+    // 处理选择的文件
+    function handleFile(file) {
+        originalFile = file;
+        convertBtn.disabled = false;
+        statusEl.textContent = `已选择文件: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+
+        // 显示预览
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // 转换图片
+    convertBtn.addEventListener('click', function() {
+        if (!originalFile) return;
+
+        statusEl.textContent = '正在转换...';
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // 创建canvas
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                // 转换格式
+                let mimeType;
+                switch (formatSelect.value) {
+                    case 'jpeg':
+                        mimeType = 'image/jpeg';
+                        break;
+                    case 'png':
+                        mimeType = 'image/png';
+                        break;
+                    case 'webp':
+                        mimeType = 'image/webp';
+                        break;
+                    case 'bmp':
+                        mimeType = 'image/bmp';
+                        break;
+                    case 'gif':
+                        mimeType = 'image/gif';
+                        break;
+                    default:
+                        mimeType = 'image/png';
+                }
+
+                // 转换质量
+                let quality = 1.0;
+                if (formatSelect.value === 'jpeg') {
+                    quality = parseInt(jpegQuality.value) / 100;
+                }
+
+                // 转换为Blob
+                canvas.toBlob(function(blob) {
+                    if (!blob) {
+                        console.error("转换失败：未生成 Blob 数据");
+                        return;
+                    }
+                    convertedBlob = blob;
+                    console.log("转换成功，Blob:", blob); // 检查是否生成
+                    // 启用下载按钮并显示
+                    downloadBtn.disabled = false;
+                    downloadBtn.style.display = "inline-block"; // 强制显示
+                    // 显示转换后的预览
+                    const url = URL.createObjectURL(blob);
+                    preview.src = url;
+
+                    statusEl.textContent = `转换完成! 新格式: ${formatSelect.value.toUpperCase()}, 大小: ${(blob.size / 1024).toFixed(2)} KB`;
+                }, mimeType, quality);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(originalFile);
+    });
+
+    // 下载转换后的图片
+    downloadBtn.addEventListener('click', function() {
+        if (!convertedBlob) return;
+
+        const url = URL.createObjectURL(convertedBlob);
+        const a = document.createElement('a');
+        a.href = url;
+
+        // 获取原始文件名（不含扩展名）
+        const originalName = originalFile.name.split('.').slice(0, -1).join('.');
+        a.download = `${originalName}.${formatSelect.value}`;
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // 释放URL对象
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+        }, 100);
+    });
+</script>
+</body>
+</html>

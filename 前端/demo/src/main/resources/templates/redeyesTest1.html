@@ -1,0 +1,789 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>去红眼测试</title>-->
+<!--    <style>-->
+<!--        #canvas {-->
+<!--            border: 1px solid black;-->
+<!--            cursor: crosshair;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <h1>去红眼测试</h1>-->
+
+<!--    <h2>上传图片</h2>-->
+<!--    <form id="uploadForm">-->
+<!--        <label for="file">选择图片 (JPG/PNG, 最大 5MB):</label>-->
+<!--        <input type="file" id="file" name="file" accept="image/jpeg, image/png" required>-->
+<!--        <br><br>-->
+<!--        <button type="submit">上传图片</button>-->
+<!--    </form>-->
+<!--    <p id="uploadStatus">尚未上传图片</p>-->
+
+<!--    <h2>绘制矩形框</h2>-->
+<!--    <canvas id="canvas"></canvas>-->
+<!--    <p>在图片上拖动鼠标绘制矩形框，完成后点击“处理图片”按钮。</p>-->
+<!--    <button id="processButton" disabled>处理图片</button>-->
+<!--    <p id="processStatus">尚未处理图片</p>-->
+
+<!--    <h2>处理后的图片</h2>-->
+<!--    <div id="processedImageContainer"></div>-->
+
+<!--    <h2>下载结果</h2>-->
+<!--    <button id="downloadButton" disabled>下载处理后的图片</button>-->
+<!--    <p id="downloadStatus">尚未下载图片</p>-->
+
+<!--    <script>-->
+<!--        const uploadForm = document.getElementById('uploadForm');-->
+<!--        const fileInput = document.getElementById('file');-->
+<!--        const uploadStatus = document.getElementById('uploadStatus');-->
+<!--        const canvas = document.getElementById('canvas');-->
+<!--        const processButton = document.getElementById('processButton');-->
+<!--        const processStatus = document.getElementById('processStatus');-->
+<!--        const downloadButton = document.getElementById('downloadButton');-->
+<!--        const downloadStatus = document.getElementById('downloadStatus');-->
+
+<!--        let ctx, img, oriImgUrl, resImgUrl;-->
+<!--        let rectangles = [];-->
+<!--        let isDrawing = false;-->
+<!--        let startX, startY;-->
+
+<!--        // 上传图片-->
+<!--        uploadForm.addEventListener('submit', async (event) => {-->
+<!--            event.preventDefault();-->
+<!--            const file = fileInput.files[0];-->
+<!--            if (!file) {-->
+<!--                uploadStatus.textContent = "请选择一张图片进行上传！";-->
+<!--                return;-->
+<!--            }-->
+
+<!--            const formData = new FormData();-->
+<!--            formData.append('image', file);-->
+
+<!--            uploadStatus.textContent = "正在上传图片...";-->
+<!--            try {-->
+<!--                const response = await fetch('http://localhost:8080/redeyes/uploads', {-->
+<!--                    method: 'POST',-->
+<!--                    body: formData,-->
+<!--                });-->
+<!--                const result = await response.json();-->
+<!--                if (result.code === 1) {-->
+<!--                    oriImgUrl = result.oriImgUrl; // 保存后端返回的 oriImgUrl-->
+<!--                    uploadStatus.textContent = "上传成功！";-->
+<!--                    const fileURL = URL.createObjectURL(file); // 使用用户选择的图片-->
+<!--                    loadImage(fileURL);-->
+<!--                } else {-->
+<!--                    uploadStatus.textContent = `上传失败: ${result.msg}`;-->
+<!--                }-->
+<!--            } catch (error) {-->
+<!--                uploadStatus.textContent = `上传失败: ${error.message}`;-->
+<!--            }-->
+<!--        });-->
+
+<!--        // 加载图片到画布-->
+<!--        function loadImage(url) {-->
+<!--            img = new Image();-->
+<!--            img.onload = () => {-->
+<!--                canvas.width = img.width;-->
+<!--                canvas.height = img.height;-->
+<!--                ctx = canvas.getContext('2d');-->
+<!--                ctx.drawImage(img, 0, 0);-->
+<!--                processButton.disabled = false;-->
+<!--            };-->
+<!--            img.src = url;-->
+<!--        }-->
+
+<!--        // 绘制矩形框-->
+<!--        canvas.addEventListener('mousedown', (event) => {-->
+<!--            isDrawing = true;-->
+<!--            const rect = canvas.getBoundingClientRect();-->
+<!--            startX = event.clientX - rect.left;-->
+<!--            startY = event.clientY - rect.top;-->
+<!--        });-->
+
+<!--        canvas.addEventListener('mousemove', (event) => {-->
+<!--            if (!isDrawing) return;-->
+<!--            const rect = canvas.getBoundingClientRect();-->
+<!--            const currentX = event.clientX - rect.left;-->
+<!--            const currentY = event.clientY - rect.top;-->
+
+<!--            // 清除画布并重新绘制图片和矩形框-->
+<!--            ctx.clearRect(0, 0, canvas.width, canvas.height);-->
+<!--            ctx.drawImage(img, 0, 0);-->
+<!--            ctx.strokeStyle = 'red';-->
+<!--            ctx.lineWidth = 2;-->
+<!--            ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);-->
+<!--        });-->
+
+<!--        canvas.addEventListener('mouseup', (event) => {-->
+<!--            if (!isDrawing) return;-->
+<!--            isDrawing = false;-->
+<!--            const rect = canvas.getBoundingClientRect();-->
+<!--            const endX = event.clientX - rect.left;-->
+<!--            const endY = event.clientY - rect.top;-->
+
+<!--            // 计算归一化坐标-->
+<!--            const x = startX / canvas.width;-->
+<!--            const y = startY / canvas.height;-->
+<!--            const w = (endX - startX) / canvas.width;-->
+<!--            const h = (endY - startY) / canvas.height;-->
+<!--            rectangles.push([x, y, w, h]);-->
+
+<!--            // 重新绘制所有矩形框-->
+<!--            ctx.clearRect(0, 0, canvas.width, canvas.height);-->
+<!--            ctx.drawImage(img, 0, 0);-->
+<!--            ctx.strokeStyle = 'red';-->
+<!--            ctx.lineWidth = 2;-->
+<!--            rectangles.forEach(([x, y, w, h]) => {-->
+<!--                ctx.strokeRect(x * canvas.width, y * canvas.height, w * canvas.width, h * canvas.height);-->
+<!--            });-->
+<!--        });-->
+
+<!--        // 处理图片-->
+<!--        // processButton.addEventListener('click', async () => {-->
+<!--        //     if (rectangles.length === 0) {-->
+<!--        //         processStatus.textContent = "请先绘制至少一个矩形框！";-->
+<!--        //         return;-->
+<!--        //     }-->
+
+<!--        //     processStatus.textContent = "正在处理图片...";-->
+<!--        //     const eyes = rectangles.map(([x, y, w, h]) => [x, y, w, h]);-->
+<!--        //     try {-->
+<!--        //         const response = await fetch('http://localhost:8080/redeyes/dispose', {-->
+<!--        //             method: 'POST',-->
+<!--        //             headers: {-->
+<!--        //                 'Content-Type': 'application/json',-->
+<!--        //             },-->
+<!--        //             body: JSON.stringify({ oriImgUrl, eyes }),-->
+<!--        //         });-->
+<!--        //         const result = await response.json();-->
+<!--        //         if (result.code === 1) {-->
+<!--        //             resImgUrl = result.data.resImgUrl;-->
+<!--        //             processStatus.textContent = "图片处理成功！";-->
+<!--        //             downloadButton.disabled = false;-->
+<!--        //         } else {-->
+<!--        //             processStatus.textContent = `图片处理失败: ${result.msg}`;-->
+<!--        //         }-->
+<!--        //     } catch (error) {-->
+<!--        //         processStatus.textContent = `处理失败: ${error.message}`;-->
+<!--        //     }-->
+<!--        // });-->
+<!--        processButton.addEventListener('click', async () => {-->
+<!--            if (rectangles.length === 0) {-->
+<!--                processStatus.textContent = "请先绘制至少一个矩形框！";-->
+<!--                return;-->
+<!--            }-->
+
+<!--            processStatus.textContent = "正在处理图片...";-->
+<!--            const eyes = rectangles.map(([x, y, w, h]) => [x, y, w, h]);-->
+<!--            try {-->
+<!--                // 调用 /redeyes/dispose 接口-->
+<!--                const response = await fetch('http://localhost:8080/redeyes/dispose', {-->
+<!--                    method: 'POST',-->
+<!--                    headers: {-->
+<!--                        'Content-Type': 'application/json',-->
+<!--                    },-->
+<!--                    body: JSON.stringify({ oriImgUrl, eyes }),-->
+<!--                });-->
+
+<!--                const result = await response.json();-->
+<!--                if (result.code === 1) {-->
+<!--                    resImgUrl = result.data.resImgUrl;-->
+<!--                    processStatus.textContent = "图片处理成功！";-->
+
+<!--                    // 调用 /redeyes/download 接口获取图片-->
+<!--                    const downloadResponse = await fetch('http://localhost:8080/redeyes/download', {-->
+<!--                        method: 'POST',-->
+<!--                        headers: {-->
+<!--                            'Content-Type': 'application/json',-->
+<!--                        },-->
+<!--                        body: JSON.stringify({ resImgUrl }),-->
+<!--                    });-->
+
+<!--                    if (downloadResponse.ok) {-->
+<!--                        const blob = await downloadResponse.blob();-->
+<!--                        const url = URL.createObjectURL(blob);-->
+
+<!--                        // 展示处理后的图片-->
+<!--                        const processedImg = new Image();-->
+<!--                        processedImg.onload = () => {-->
+<!--                            // 图片加载完成后再释放 URL-->
+<!--                            URL.revokeObjectURL(url);-->
+<!--                        };-->
+<!--                        processedImg.src = url;-->
+<!--                        processedImg.alt = "处理后的图片";-->
+<!--                        processedImg.style.maxWidth = "100%";-->
+
+<!--                        // 将图片插入到页面中-->
+<!--                        const container = document.getElementById('processedImageContainer');-->
+<!--                        container.innerHTML = ''; // 清空之前的内容-->
+<!--                        container.appendChild(processedImg);-->
+
+<!--                        // 启用下载按钮-->
+<!--                        downloadButton.disabled = false;-->
+
+<!--                        // 释放 URL 对象-->
+<!--                        // URL.revokeObjectURL(url);-->
+<!--                    } else {-->
+<!--                        processStatus.textContent = "图片下载失败！";-->
+<!--                    }-->
+<!--                } else {-->
+<!--                    processStatus.textContent = `图片处理失败: ${result.msg}`;-->
+<!--                }-->
+<!--            } catch (error) {-->
+<!--                processStatus.textContent = `处理失败: ${error.message}`;-->
+<!--            }-->
+<!--        });-->
+<!--        // 下载图片-->
+<!--        downloadButton.addEventListener('click', async () => {-->
+<!--            downloadStatus.textContent = "正在下载图片...";-->
+<!--            try {-->
+<!--                const response = await fetch('http://localhost:8080/redeyes/download', {-->
+<!--                    method: 'POST',-->
+<!--                    headers: {-->
+<!--                        'Content-Type': 'application/json',-->
+<!--                    },-->
+<!--                    body: JSON.stringify({ resImgUrl }),-->
+<!--                });-->
+<!--                if (response.ok) {-->
+<!--                    const blob = await response.blob();-->
+<!--                    const url = URL.createObjectURL(blob);-->
+<!--                    const a = document.createElement('a');-->
+<!--                    a.href = url;-->
+<!--                    a.download = 'processed_image.png';-->
+<!--                    a.click();-->
+<!--                    URL.revokeObjectURL(url);-->
+<!--                    downloadStatus.textContent = "图片下载成功！";-->
+<!--                } else {-->
+<!--                    downloadStatus.textContent = "图片下载失败！";-->
+<!--                }-->
+<!--            } catch (error) {-->
+<!--                downloadStatus.textContent = `下载失败: ${error.message}`;-->
+<!--            }-->
+<!--        });-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/homee.css}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能去红眼工具</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --danger-color: #ff5a5f;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .main-container {
+            margin-right: 20px; /* 减少右侧边距 */
+            margin-left: 20px; /* 增加左侧边距 */
+            max-width: calc(100%); /* 动态计算最大宽度 */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--success-color));
+            border-radius: 2px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .file-input-wrapper {
+            border: 2px dashed #e2e8f0;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            transition: var(--transition);
+            background-color: rgba(67, 97, 238, 0.03);
+        }
+
+        .file-input-wrapper:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.08);
+        }
+
+        #canvas {
+            width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            cursor: crosshair;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .btn:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+        }
+
+        .status-box {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-success {
+            background-color: rgba(76, 201, 240, 0.1);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .status-error {
+            background-color: rgba(255, 90, 95, 0.1);
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .result-image {
+            width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .download-btn {
+            background-color: var(--success-color);
+            margin-top: 20px;
+        }
+
+        .download-btn:hover {
+            background-color: #3aa8d8;
+        }
+
+        .instruction {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+        /* 修改后的按钮颜色定义 */
+        .feature-btn:nth-of-type(1) { background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%); }
+        .feature-btn:nth-of-type(2) { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+        .feature-btn:nth-of-type(3) { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        .feature-btn:nth-of-type(4) { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+        .feature-btn:nth-of-type(5) { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
+        .feature-btn:nth-of-type(6) { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+        .feature-btn:nth-of-type(7) { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
+        .feature-btn:nth-of-type(8) { background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); }
+        .feature-btn:nth-of-type(9) { background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%); }
+        .feature-btn:nth-of-type(10) { background: linear-gradient(135deg, #84cc16 0%, #a3e635 100%); }
+    </style>
+
+
+</head>
+<body>
+<nav class="fixed-nav">
+    <div class="nav-container">
+        <!-- 左侧标题 -->
+        <h2>ImageCraft 图艺工坊</h2>
+
+        <!-- 右侧登录注册 -->
+        <div class="auth-links">
+            <a th:href="@{/changepassword}">修改密码</a>
+            <a th:href="@{/login}">退出登录</a>
+        </div>
+    </div>
+</nav>
+
+<!-- 左侧功能导航 -->
+
+<div class="features-container">
+    <nav class="features-nav">
+        <a href="Picture_croppingmem" class="feature-btn">
+            <span class="btn-text">图片裁剪</span>
+        </a>
+        <a href="Compressmem" class="feature-btn">
+            <span class="btn-text">图片压缩</span>
+        </a>
+        <a href="Conversionmem" class="feature-btn">
+            <span class="btn-text">格式转换</span>
+        </a>
+        <a href="Test_Addedmem" class="feature-btn">
+            <span class="btn-text">添加文字</span>
+        </a>
+        <a href="GIFmem" class="feature-btn">
+            <span class="btn-text">生成GIF</span>
+        </a>
+        <a href="scratchTest3" class="feature-btn">
+            <span class="btn-text">图片去划痕</span>
+        </a>
+        <a href="redeyesTest1" class="feature-btn">
+            <span class="btn-text">图片去红眼</span>
+        </a>
+        <a href="deepfill" class="feature-btn">
+            <span class="btn-text">水印和物体去除</span>
+        </a>
+        <a href="stylegabtest2" class="feature-btn">
+            <span class="btn-text">图片生成</span>
+        </a>
+        <a href="denoisingTest" class="feature-btn">
+            <span class="btn-text">图片去噪点</span>
+        </a>
+    </nav>
+</div>
+
+<!-- 功能内容区 -->
+<div class="main-container">
+    <h1>智能去红眼工具</h1>
+
+    <div class="container">
+        <!-- 上传区域 -->
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <form id="uploadForm">
+                    <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--primary-color); margin-bottom: 15px;"></i>
+                    <p style="color: var(--gray-color); margin-bottom: 20px;">拖放图片或点击上传 (JPG/PNG, 最大5MB)</p>
+                    <input type="file" id="file" name="file" accept="image/jpeg, image/png" required
+                           style="display: none;">
+                    <button type="button" class="btn" onclick="document.getElementById('file').click()">
+                        <i class="fas fa-folder-open"></i> 选择文件
+                    </button>
+                </form>
+            </div>
+            <div id="uploadStatus" class="status-box"></div>
+        </div>
+
+        <!-- 处理区域 -->
+        <div class="processing-section">
+            <h3><i class="fas fa-draw-polygon"></i> 标记红眼区域</h3>
+            <p class="instruction">在图片上拖动鼠标绘制矩形框标记红眼区域</p>
+            <canvas id="canvas"></canvas>
+            <div style="margin-top: 20px;">
+                <button id="processButton" class="btn" disabled>
+                    <i class="fas fa-magic"></i> 开始处理
+                </button>
+            </div>
+            <div id="processStatus" class="status-box"></div>
+        </div>
+
+        <!-- 结果区域 -->
+        <div class="result-section">
+            <h3><i class="fas fa-image"></i> 处理结果</h3>
+            <div id="processedImageContainer"></div>
+            <div style="margin-top: 20px;">
+                <button id="downloadButton" class="btn download-btn" disabled>
+                    <i class="fas fa-download"></i> 下载结果
+                </button>
+            </div>
+            <div id="downloadStatus" class="status-box"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 样式相关常量
+    const STATUS_STYLE = {
+        SUCCESS: 'status-success',
+        ERROR: 'status-error'
+    };
+
+    // DOM元素
+    const uploadForm = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('file');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const canvas = document.getElementById('canvas');
+    const processButton = document.getElementById('processButton');
+    const processStatus = document.getElementById('processStatus');
+    const downloadButton = document.getElementById('downloadButton');
+    const downloadStatus = document.getElementById('downloadStatus');
+
+    let ctx, img, oriImgUrl, resImgUrl;
+    let rectangles = [];
+    let isDrawing = false;
+    let startX, startY;
+
+    // 初始化状态显示
+    function initStatus(element) {
+        element.className = 'status-box';
+        element.innerHTML = '';
+    }
+
+    // 显示状态消息
+    function showStatus(element, message, style = '') {
+        initStatus(element);
+        element.classList.add(style);
+        element.innerHTML = `
+                <i class="fas fa-spinner fa-pulse"></i>
+                <span>${message}</span>
+            `;
+    }
+
+    // 显示成功状态
+    function showSuccess(element, message) {
+        initStatus(element);
+        element.classList.add(STATUS_STYLE.SUCCESS);
+        element.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>${message}</span>
+            `;
+    }
+
+    // 显示错误状态
+    function showError(element, message) {
+        initStatus(element);
+        element.classList.add(STATUS_STYLE.ERROR);
+        element.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i>
+                <span>${message}</span>
+            `;
+    }
+
+    // 文件上传处理
+    /*uploadForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        showStatus(uploadStatus, '正在上传图片...');
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch('http://localhost:8080/redeyes/uploads', {
+                method: 'POST',
+                body: formData,
+            });
+            const result = await response.json();
+
+            if (result.code === 1) {
+                oriImgUrl = result.oriImgUrl;
+                showSuccess(uploadStatus, '图片上传成功！');
+                loadImage(URL.createObjectURL(file));
+            } else {
+                showError(uploadStatus, `上传失败: ${result.msg}`);
+            }
+        } catch (error) {
+            showError(uploadStatus, `上传失败: ${error.message}`);
+        }
+    });*/
+	// 修改文件输入监听方式（删除原表单submit监听）
+fileInput.addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    showStatus(uploadStatus, '正在上传图片...');
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+        const response = await fetch('http://localhost:8080/redeyes/uploads', {
+            method: 'POST',
+            body: formData,
+        });
+        const result = await response.json();
+
+        if (result.code === 1) {
+            oriImgUrl = result.oriImgUrl;
+            showSuccess(uploadStatus, '图片上传成功！');
+            loadImage(URL.createObjectURL(file));
+        } else {
+            showError(uploadStatus, `上传失败: ${result.msg}`);
+        }
+    } catch (error) {
+        showError(uploadStatus, `上传失败: ${error.message}`);
+    }
+});
+
+    // 加载图片到画布
+    function loadImage(url) {
+        img = new Image();
+        img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            processButton.disabled = false;
+            canvas.style.display = 'block';
+        };
+        img.onerror = () => showError(uploadStatus, '图片加载失败');
+        img.src = url;
+    }
+
+    // 画布绘制逻辑
+    function handleCanvasInteraction() {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            startX = (e.clientX - rect.left) * scaleX;
+            startY = (e.clientY - rect.top) * scaleY;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const currentX = (e.clientX - rect.left) * scaleX;
+            const currentY = (e.clientY - rect.top) * scaleY;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            drawRect(startX, startY, currentX - startX, currentY - startY);
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (!isDrawing) return;
+            isDrawing = false;
+            const endX = (e.clientX - rect.left) * scaleX;
+            const endY = (e.clientY - rect.top) * scaleY;
+
+            const normalizedRect = [
+                startX / canvas.width,
+                startY / canvas.height,
+                (endX - startX) / canvas.width,
+                (endY - startY) / canvas.height
+            ];
+            rectangles.push(normalizedRect);
+            redrawCanvas();
+        });
+    }
+
+    function drawRect(x, y, w, h) {
+        ctx.strokeStyle = '#ff4757';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(x, y, w, h);
+    }
+
+    function redrawCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        rectangles.forEach(rect => {
+            const [x, y, w, h] = rect;
+            drawRect(x * canvas.width, y * canvas.height, w * canvas.width, h * canvas.height);
+        });
+    }
+
+    // 图片处理逻辑
+    processButton.addEventListener('click', async () => {
+        if (rectangles.length === 0) {
+            showError(processStatus, '请先标记红眼区域！');
+            return;
+        }
+
+        showStatus(processStatus, '正在处理图片...');
+
+        try {
+            const response = await fetch('http://localhost:8080/redeyes/dispose', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oriImgUrl, eyes: rectangles }),
+            });
+
+            const result = await response.json();
+            if (result.code !== 1) throw new Error(result.msg);
+
+            const downloadRes = await fetch('http://localhost:8080/redeyes/download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ resImgUrl: result.data.resImgUrl }),
+            });
+
+            if (!downloadRes.ok) throw new Error('图片下载失败');
+
+            const blob = await downloadRes.blob();
+            const url = URL.createObjectURL(blob);
+            showProcessedImage(url);
+            downloadButton.disabled = false;
+            showSuccess(processStatus, '图片处理成功！');
+
+        } catch (error) {
+            showError(processStatus, `处理失败: ${error.message}`);
+        }
+    });
+
+    function showProcessedImage(url) {
+        const container = document.getElementById('processedImageContainer');
+        container.innerHTML = `
+                <img src="${url}" class="result-image" alt="处理结果">
+            `;
+        downloadButton.href = url;
+        downloadButton.download = `redeye_removal_${Date.now()}.png`;
+    }
+
+    // 初始化画布交互
+    handleCanvasInteraction();
+</script>
+</body>
+</html>
