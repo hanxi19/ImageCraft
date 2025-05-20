@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/homee.css}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片转GIF工具</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #6b85f1;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --warning-color: #ffbe0b;
+            --danger-color: #ff5a5f;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .main-container {
+            margin-right: 20px; /* 减少右侧边距 */
+            margin-left: 20px; /* 增加左侧边距 */
+            max-width: calc(100%); /* 动态计算最大宽度 */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--success-color));
+            border-radius: 2px;
+        }
+        
+        .upload-area {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            margin: 0 10px;
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            box-shadow: 0 4px 8px rgba(76, 201, 240, 0.2);
+        }
+        
+        .btn-success:hover {
+            background-color: #3aa8d8;
+            box-shadow: 0 6px 12px rgba(76, 201, 240, 0.25);
+        }
+        
+        .btn:disabled {
+            background-color: #b0b0b0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            border: 2px dashed #d1d5db;
+            border-radius: var(--border-radius);
+            min-height: 100px;
+            background-color: rgba(67, 97, 238, 0.03);
+            transition: var(--transition);
+        }
+        
+        .file-list.empty {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--gray-color);
+            font-style: italic;
+        }
+        
+        .file-item {
+            padding: 12px 15px;
+            margin: 8px;
+            background: white;
+            border-radius: var(--border-radius);
+            cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .file-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .file-item.dragging {
+            opacity: 0.5;
+            background-color: var(--light-color);
+        }
+        
+        .file-item .file-name {
+            flex: 1;
+            margin-right: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .file-item .remove-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .file-item .remove-btn:hover {
+            background-color: #e63946;
+            transform: scale(1.1);
+        }
+        
+        .preview-area {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(76, 201, 240, 0.1);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--success-color);
+            text-align: center;
+        }
+        
+        .preview-area h3 {
+            color: var(--success-color);
+            margin-bottom: 15px;
+        }
+        
+        .download-link {
+            display: inline-block;
+            background-color: var(--success-color);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(76, 201, 240, 0.2);
+        }
+        
+        .download-link:hover {
+            background-color: #3aa8d8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(76, 201, 240, 0.25);
+        }
+        
+        .gif-preview {
+            max-width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 15px;
+        }
+        
+        .error {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: rgba(255, 90, 95, 0.1);
+            color: var(--danger-color);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .file-count {
+            margin-top: 10px;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .upload-area {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+    
+    
+
+    
+</head>
+<body>
+<nav class="fixed-nav">
+    <div class="nav-container">
+        <!-- 左侧标题 -->
+        <h2>ImageCraft 图艺工坊</h2>
+
+        <!-- 右侧登录注册 -->
+        <div class="auth-links">
+            <a th:href="@{/changepassword}">修改密码</a>
+            <a th:href="@{/login}">退出登录</a>
+        </div>
+    </div>
+</nav>
+
+    <!-- 左侧功能导航 -->
+
+    <div class="features-container">
+        <nav class="features-nav">
+            <a href="Picture_croppingmem" class="feature-btn">
+                <span class="btn-text">图片裁剪</span>
+            </a>
+            <a href="Compressmem" class="feature-btn">
+                <span class="btn-text">图片压缩</span>
+            </a>
+            <a href="Conversionmem" class="feature-btn">
+                <span class="btn-text">格式转换</span>
+            </a>
+            <a href="Test_Addedmem" class="feature-btn">
+                <span class="btn-text">添加文字</span>
+            </a>
+            <a href="GIFmem" class="feature-btn">
+                <span class="btn-text">生成GIF</span>
+            </a>
+            <a href="scratchTest3" class="feature-btn">
+                <span class="btn-text">图片去划痕</span>
+            </a>
+            <a href="redeyesTest1" class="feature-btn">
+                <span class="btn-text">图片去红眼</span>
+            </a>
+            <a href="deepfill" class="feature-btn">
+                <span class="btn-text">水印与物体去除</span>
+            </a>
+            <a href="stylegabtest2" class="feature-btn">
+                <span class="btn-text">图片生成</span>
+            </a>
+            <a href="denoisingTest" class="feature-btn">
+                <span class="btn-text">图片去噪点</span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- 功能内容区 -->
+    <div class="main-container">
+        <h1>图片转GIF工具</h1>
+        
+        <div class="upload-area">
+            <button class="btn" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-folder-open"></i> 选择图片
+            </button>
+            <button class="btn btn-success" onclick="uploadFiles()" id="generateBtn" disabled>
+                <i class="fas fa-magic"></i> 生成GIF
+            </button>
+            <input type="file" id="fileInput" multiple accept="image/*">
+            <div class="file-count" id="fileCount">已选择 0 张图片</div>
+        </div>
+
+        <ul class="file-list empty" id="fileList">
+            <li>请添加图片文件</li>
+        </ul>
+
+        <div id="result" class="preview-area" style="display: none;">
+            <h3><i class="fas fa-check-circle"></i> 转换成功！</h3>
+            <a href="#" class="download-link" id="downloadLink">
+                <i class="fas fa-download"></i> 下载GIF
+            </a>
+            <img src="" class="gif-preview" id="gifPreview">
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let draggingIndex = null;
+
+        // 处理文件选择
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            selectedFiles = Array.from(e.target.files);
+            updateFileList();
+            updateGenerateButton();
+        });
+
+        // 更新文件列表显示
+        function updateFileList() {
+    const list = document.getElementById('fileList');
+    const fileCount = document.getElementById('fileCount');
+    
+    list.innerHTML = ''; // 先清空列表
+    
+    if (selectedFiles.length === 0) {
+        list.innerHTML = '<li>请添加图片文件</li>';
+        list.className = 'file-list empty';
+        fileCount.textContent = '已选择 0 张图片';
+        return;
+    }
+    
+    if (selectedFiles.length < 2) {
+        const warningLi = document.createElement('li');
+        warningLi.className = 'warning';
+        warningLi.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 至少需要选择2张图片才能生成GIF（当前已选择${selectedFiles.length}张）`;
+        list.appendChild(warningLi);
+        list.className = 'file-list warning';
+    } else {
+        list.className = 'file-list';
+    }
+    
+    // 添加文件列表项
+    selectedFiles.forEach((file, index) => {
+        const li = document.createElement('li');
+        li.className = 'file-item';
+        li.draggable = true;
+        li.dataset.index = index;
+        li.innerHTML = `
+            <span class="file-name">${file.name}</span>
+            <button class="remove-btn" onclick="removeFile(${index})">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+                // 拖拽排序处理
+                li.addEventListener('dragstart', e => {
+                    draggingIndex = index;
+                    li.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', index);
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                li.addEventListener('dragend', () => {
+                    li.classList.remove('dragging');
+                    draggingIndex = null;
+                });
+
+                li.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    if (draggingIndex !== index) {
+                        li.style.borderTop = '2px solid var(--primary-color)';
+                    }
+                });
+
+                li.addEventListener('dragleave', () => {
+                    li.style.borderTop = '';
+                });
+
+                li.addEventListener('drop', e => {
+                    e.preventDefault();
+                    li.style.borderTop = '';
+                    if (draggingIndex !== null && draggingIndex !== index) {
+                        moveFile(draggingIndex, index);
+                    }
+                });
+
+                list.appendChild(li);
+            });
+            
+            fileCount.textContent = `已选择 ${selectedFiles.length} 张图片`;
+        }
+
+        // 更新生成按钮状态
+        function updateGenerateButton() {
+            document.getElementById('generateBtn').disabled = selectedFiles.length < 2;
+        }
+
+        // 移除文件
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            updateGenerateButton();
+        } 
+		
+
+        // 移动文件位置
+        function moveFile(fromIndex, toIndex) {
+            const fileToMove = selectedFiles[fromIndex];
+            selectedFiles.splice(fromIndex, 1);
+            selectedFiles.splice(toIndex, 0, fileToMove);
+            updateFileList();
+        }
+
+        // 上传文件生成GIF
+        async function uploadFiles() {
+            if (selectedFiles.length < 2) {
+                alert('请至少选择2张图片');
+                return;
+            }
+
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 正在生成...';
+
+            const formData = new FormData();
+            selectedFiles.forEach(file => formData.append('files', file));
+
+            try {
+                const response = await fetch('/api/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const resultDiv = document.getElementById('result');
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    
+                    const downloadLink = document.getElementById('downloadLink');
+                    downloadLink.href = url;
+                    downloadLink.download = `animation_${new Date().toISOString().slice(0, 10)}.gif`;
+                    
+                    document.getElementById('gifPreview').src = url;
+                    resultDiv.style.display = 'block';
+                    
+                    // 滚动到结果区域
+                    resultDiv.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>错误：${error}</span>
+                        </div>
+                    `;
+                    resultDiv.style.display = 'block';
+                }
+            } catch (error) {
+                alert('请求失败: ' + error.message);
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-magic"></i> 生成GIF';
+            }
+        }
+
+        // 拖放文件到页面
+        document.addEventListener('dragover', e => {
+            e.preventDefault();
+        });
+
+        document.addEventListener('drop', e => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) {
+                document.getElementById('fileInput').files = e.dataTransfer.files;
+                const event = new Event('change');
+                document.getElementById('fileInput').dispatchEvent(event);
+            }
+        });
+    </script>
+</body>
+</html>

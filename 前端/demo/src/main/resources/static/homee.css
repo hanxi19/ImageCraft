@@ -1,0 +1,138 @@
+/* ===== 样式重置 ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+/* ===== 通用布局样式 ===== */
+body {
+    background-color: #f4f4f4;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    padding-top: 80px;
+    min-height: 100vh;
+    transition: background-color 0.3s ease;
+}
+
+.main-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 1400px;
+	margin-left: auto;  /* 关键属性 */
+ 	margin-right: 30px;
+	margin-top: 0;
+	min-height: 800px;   /* 容器最小高度 */
+}
+
+/* ===== 导航栏样式 ===== */
+.fixed-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    padding: 10px 0;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.auth-links {
+    display: flex;
+    gap: 1.2rem;
+}
+
+.auth-links a {
+    padding: 0.6rem 1.2rem;
+    border-radius: 25px;
+    background: #007bff;
+    color: white !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+.features-container {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.features-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.feature-btn {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 8px;
+    color: white !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+    );
+    transition: 0.5s;
+}
+
+.feature-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(99, 102, 241, 0.3);
+}
+
+.feature-btn:hover::before {
+    left: 100%;
+}
+
+.btn-text {
+    position: relative;
+    z-index: 2;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* 可选：为不同按钮添加不同颜色 */
+
+/* 修改后的按钮颜色定义 */
+.feature-btn:nth-of-type(1) { background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%); }
+.feature-btn:nth-of-type(2) { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+.feature-btn:nth-of-type(3) { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+.feature-btn:nth-of-type(4) { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+.feature-btn:nth-of-type(5) { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
+.feature-btn:nth-of-type(6) { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+.feature-btn:nth-of-type(7) { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
+.feature-btn:nth-of-type(8) { background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); }
+.feature-btn:nth-of-type(9) { background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%); }
+.feature-btn:nth-of-type(10) { background: linear-gradient(135deg, #84cc16 0%, #a3e635 100%); }

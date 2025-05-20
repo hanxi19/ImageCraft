@@ -1,0 +1,490 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>StyleGAN Image Generator</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <h1>StyleGAN 图片生成器</h1>-->
+
+<!--    <form id="genForm">-->
+<!--        <label for="seed">种子 (seed):</label>-->
+<!--        <input type="number" id="seed" name="seed" value="42" required>-->
+<!--        <br><br>-->
+
+<!--        <label for="trunc">图片质量 (trunc):</label>-->
+<!--        <input type="number" id="trunc" name="trunc" step="0.1" value="0.7" min="0.1" max="1.0" required>-->
+<!--        <br><br>-->
+
+<!--        <label for="network">网络类型 (network):</label>-->
+<!--        <select id="network" name="network" required>-->
+<!--            <option value="0">猫</option>-->
+<!--            <option value="1">狗</option>-->
+<!--            <option value="2">艺术人像</option>-->
+<!--        </select>-->
+<!--        <br><br>-->
+
+<!--        <button type="submit">生成图片</button>-->
+<!--    </form>-->
+
+<!--    <h2>生成结果</h2>-->
+<!--    <div id="result">-->
+<!--        <p id="status">尚未生成图片</p>-->
+<!--        <img id="generatedImage" src="" alt="生成的图片" style="display: none; max-width: 100%; height: auto;">-->
+<!--    </div>-->
+
+<!--    <script>-->
+<!--        document.getElementById('genForm').addEventListener('submit', async function (event) {-->
+<!--            event.preventDefault();-->
+
+<!--            const seed = document.getElementById('seed').value;-->
+<!--            const trunc = document.getElementById('trunc').value;-->
+<!--            const network = document.getElementById('network').value;-->
+
+<!--            const statusElement = document.getElementById('status');-->
+<!--            const imageElement = document.getElementById('generatedImage');-->
+
+<!--            statusElement.textContent = "正在生成图片...";-->
+<!--            imageElement.style.display = "none";-->
+
+<!--            try {-->
+<!--                // 调用 /stylegan/gen 接口-->
+<!--                const genResponse = await fetch('http://localhost:8080/stylegan/gen', {-->
+<!--                    method: 'POST',-->
+<!--                    headers: {-->
+<!--                        'Content-Type': 'application/x-www-form-urlencoded',-->
+<!--                    },-->
+<!--                    body: new URLSearchParams({-->
+<!--                        seed: seed,-->
+<!--                        trunc: trunc,-->
+<!--                        network: network,-->
+<!--                    }),-->
+<!--                });-->
+
+<!--                if (!genResponse.ok) {-->
+<!--                    throw new Error(`生成图片失败: ${genResponse.statusText}`);-->
+<!--                }-->
+
+<!--                const genData = await genResponse.json();-->
+<!--                if (genData.code !== 200) {-->
+<!--                    throw new Error(`生成图片失败: ${genData.msg}`);-->
+<!--                }-->
+
+<!--                console.log('genResponse:', genResponse);-->
+
+<!--                const resImgUrl = genData.resImgUrl;-->
+
+<!--                // 调用 /stylegan/result 接口获取图片-->
+<!--                const resultResponse = await fetch(`http://localhost:8080/stylegan/result?resImgUrl=${encodeURIComponent(resImgUrl)}`);-->
+<!--                if (!resultResponse.ok) {-->
+<!--                    throw new Error(`获取图片失败: ${resultResponse.statusText}`);-->
+<!--                }-->
+
+<!--                const blob = await resultResponse.blob();-->
+<!--                const imageUrl = URL.createObjectURL(blob);-->
+
+<!--                // 显示图片-->
+<!--                imageElement.src = imageUrl;-->
+<!--                imageElement.style.display = "block";-->
+<!--                statusElement.textContent = "图片生成成功！";-->
+
+<!--            } catch (error) {-->
+<!--                statusElement.textContent = `错误: ${error.message}`;-->
+<!--            }-->
+<!--        });-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/homee.css}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyleGAN 图像生成器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #6b85f1;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --warning-color: #ffbe0b;
+            --danger-color: #ff5a5f;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .main-container {
+            margin-right: 20px; /* 减少右侧边距 */
+            margin-left: 20px; /* 增加左侧边距 */
+            max-width: calc(100%); /* 动态计算最大宽度 */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--success-color));
+            border-radius: 2px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .btn:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+        }
+
+        .result-container {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: rgba(76, 201, 240, 0.1);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--success-color);
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .generated-image {
+            width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 15px;
+            display: none;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--success-color);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: var(--transition);
+            width: fit-content;
+            margin-top: 15px;
+            box-shadow: 0 4px 8px rgba(76, 201, 240, 0.2);
+        }
+
+        .download-btn:hover {
+            background-color: #3aa8d8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(76, 201, 240, 0.25);
+        }
+
+        .status-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray-color);
+        }
+
+        .error-container {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: rgba(255, 90, 95, 0.1);
+            color: var(--danger-color);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--danger-color);
+            display: none;
+        }
+
+        .error-container.show {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+        /* 修改后的按钮颜色定义 */
+        .feature-btn:nth-of-type(1) { background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%); }
+        .feature-btn:nth-of-type(2) { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+        .feature-btn:nth-of-type(3) { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        .feature-btn:nth-of-type(4) { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+        .feature-btn:nth-of-type(5) { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
+        .feature-btn:nth-of-type(6) { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+        .feature-btn:nth-of-type(7) { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
+        .feature-btn:nth-of-type(8) { background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); }
+        .feature-btn:nth-of-type(9) { background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%); }
+        .feature-btn:nth-of-type(10) { background: linear-gradient(135deg, #84cc16 0%, #a3e635 100%); }
+    </style>
+
+
+</head>
+<body>
+<nav class="fixed-nav">
+    <div class="nav-container">
+        <!-- 左侧标题 -->
+        <h2>ImageCraft 图艺工坊</h2>
+
+        <!-- 右侧登录注册 -->
+        <div class="auth-links">
+            <a th:href="@{/changepassword}">修改密码</a>
+            <a th:href="@{/login}">退出登录</a>
+        </div>
+    </div>
+</nav>
+
+<!-- 左侧功能导航 -->
+
+<div class="features-container">
+    <nav class="features-nav">
+        <a href="Picture_croppingmem" class="feature-btn">
+            <span class="btn-text">图片裁剪</span>
+        </a>
+        <a href="Compressmem" class="feature-btn">
+            <span class="btn-text">图片压缩</span>
+        </a>
+        <a href="Conversionmem" class="feature-btn">
+            <span class="btn-text">格式转换</span>
+        </a>
+        <a href="Test_Addedmem" class="feature-btn">
+            <span class="btn-text">添加文字</span>
+        </a>
+        <a href="GIFmem" class="feature-btn">
+            <span class="btn-text">生成GIF</span>
+        </a>
+        <a href="scratchTest3" class="feature-btn">
+            <span class="btn-text">图片去划痕</span>
+        </a>
+        <a href="redeyesTest1" class="feature-btn">
+            <span class="btn-text">图片去红眼</span>
+        </a>
+        <a href="deepfill" class="feature-btn">
+            <span class="btn-text">水印和物体去除</span>
+        </a>
+        <a href="stylegabtest2" class="feature-btn">
+            <span class="btn-text">图片生成</span>
+        </a>
+        <a href="denoisingTest" class="feature-btn">
+            <span class="btn-text">图片去噪点</span>
+        </a>
+    </nav>
+</div>
+
+<!-- 功能内容区 -->
+<div class="main-container">
+    <h1>StyleGAN 图像生成器</h1>
+
+    <div class="container">
+        <form id="genForm">
+            <div class="form-group">
+                <label for="seed"><i class="fas fa-seedling"></i> 随机种子</label>
+                <input type="number" id="seed" name="seed" value="42" required>
+            </div>
+
+            <div class="form-group">
+                <label for="trunc"><i class="fas fa-paint-brush"></i> 生成质量 (0.1-1.0)</label>
+                <input type="number" id="trunc" name="trunc" step="0.1" value="0.7" min="0.1" max="1.0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="network"><i class="fas fa-network-wired"></i> 生成类型</label>
+                <select id="network" name="network" required>
+                    <option value="0">🐱 猫</option>
+                    <option value="1">🐶 狗</option>
+                    <option value="2">🎨 艺术人像</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn" id="generateBtn">
+                <i class="fas fa-magic"></i> 立即生成
+            </button>
+        </form>
+
+        <div class="result-container" id="resultContainer">
+            <p class="status-text" id="statusText">
+                <i class="fas fa-spinner fa-pulse"></i>
+                <span>正在生成图像...</span>
+            </p>
+            <img id="generatedImage" class="generated-image" alt="生成的图像">
+            <a id="downloadBtn" href="#" class="download-btn" style="display: none;">
+                <i class="fas fa-download"></i> 下载图像
+            </a>
+        </div>
+
+        <div class="error-container" id="errorContainer">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('genForm');
+    const generateBtn = document.getElementById('generateBtn');
+    const statusText = document.getElementById('statusText');
+    const imageElement = document.getElementById('generatedImage');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resultContainer = document.getElementById('resultContainer');
+    const errorContainer = document.getElementById('errorContainer');
+    const errorText = document.getElementById('errorText');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        errorContainer.classList.remove('show');
+        resultContainer.classList.add('show');
+        generateBtn.disabled = true;
+
+        const seed = document.getElementById('seed').value;
+        const trunc = document.getElementById('trunc').value;
+        const network = document.getElementById('network').value;
+
+        try {
+            // 更新状态显示
+            statusText.innerHTML = `
+                    <i class="fas fa-spinner fa-pulse"></i>
+                    <span>正在生成图像...</span>
+                `;
+            imageElement.style.display = 'none';
+            downloadBtn.style.display = 'none';
+
+            // 调用生成接口
+            const genResponse = await fetch('http://localhost:8080/stylegan/gen', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ seed, trunc, network }),
+            });
+
+            if (!genResponse.ok) throw new Error(`请求失败: ${genResponse.status}`);
+
+            const genData = await genResponse.json();
+            if (genData.code !== 200) throw new Error(genData.msg);
+
+            // 获取生成的图片
+            const resultResponse = await fetch(
+                `http://localhost:8080/stylegan/result?resImgUrl=${encodeURIComponent(genData.resImgUrl)}`
+            );
+
+            if (!resultResponse.ok) throw new Error('图片获取失败');
+
+            // 显示结果
+            const blob = await resultResponse.blob();
+            const imageUrl = URL.createObjectURL(blob);
+
+            imageElement.src = imageUrl;
+            imageElement.style.display = 'block';
+            downloadBtn.href = imageUrl;
+            downloadBtn.download = `stylegan_${Date.now()}.png`;
+            downloadBtn.style.display = 'inline-flex';
+
+            statusText.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <span>图像生成成功！</span>
+                `;
+
+        } catch (error) {
+            errorText.textContent = error.message;
+            errorContainer.classList.add('show');
+            statusText.innerHTML = `
+                    <i class="fas fa-times-circle"></i>
+                    <span>生成失败</span>
+                `;
+        } finally {
+            generateBtn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
