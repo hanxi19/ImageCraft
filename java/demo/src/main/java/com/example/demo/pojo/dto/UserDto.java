@@ -1,7 +1,5 @@
 package com.example.demo.pojo.dto;
 
-import jakarta.persistence.Column;
-
 public class UserDto {
 
     //需要新增的字段
