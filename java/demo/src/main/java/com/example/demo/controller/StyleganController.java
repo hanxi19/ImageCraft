@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
 import com.example.demo.pojo.StyleganBean;
-import com.example.demo.service.StyleganService;
 import com.example.demo.service.styleganimpl.StyleganService1;
 import com.example.demo.util.PathUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +12,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

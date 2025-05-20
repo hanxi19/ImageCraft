@@ -49,6 +49,23 @@ public class FileStorageConfig {
     @Value("${file.upload-dir.stylegan.resImg}")
     private String styleganResImgLocation;
 
+    // Segment 相关路径
+    @Value("${file.upload-dir.segment.oriImg}")
+    private String segmentOriImgLocation;
+
+    @Value("${file.upload-dir.segment.resImg}")
+    private String segmentResImgLocation;
+
+    //Ocr相关路径
+    @Value("${file.upload-dir.ocr.oriImg}")
+    private String ocrOriImgLocation;
+
+    @Value("${file.upload-dir.ocr.resTxt}")
+    private String ocrResTxtLocation;
+
+    @Value("${file.upload-dir.ocr.transTxt}")
+    private String ocrTransTxtLocation;
+
 
     // root Bean
     @Bean(name = "rootPath")
@@ -109,6 +126,32 @@ public class FileStorageConfig {
     @Bean(name = "scratchResImgPath")
     public Path scratchResImgPath() {
         return createDir(scratchResImgLocation);
+    }
+
+    // Segment  Bean
+    @Bean(name = "segmentOriImgPath")
+    public Path segmentOriImgPath() {
+        return createDir(segmentOriImgLocation);
+    }
+
+    @Bean(name = "segmentResImgPath")
+    public Path segmentResImgPath() {
+        return createDir(segmentResImgLocation);
+    }
+
+    // Ocr Bean
+    @Bean(name = "ocrOriImgLocation")
+    public Path ocrOriImgLocation() {
+        return createDir(ocrOriImgLocation);
+    }
+
+    @Bean(name = "ocrResTxtLocation")
+    public Path ocrResTxtLocation() {
+        return createDir(ocrResTxtLocation);
+    }
+    @Bean(name = "ocrTransTxtLocation")
+    public Path ocrTransTxtLocation() {
+        return createDir(ocrTransTxtLocation);
     }
 
     /**

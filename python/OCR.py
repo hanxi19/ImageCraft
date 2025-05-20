@@ -1,26 +1,27 @@
 import argparse
+import os
 from paddleocr import PaddleOCR
 
 
 def extract_text_from_image(image_path, lang='ch'):
     """
-    使用 PaddleOCR 提取图片中的文字
-    参数:
-        image_path: 图片路径
-        lang: 语言类型 ('ch'-中文, 'en'-英文, 'japan'-日文等)
-    返回:
-        保持原始行格式的识别文本
+    Extract text from an image using PaddleOCR
+    Parameters:
+        image_path: Path to the image
+        lang: Language type ('ch'-Chinese, 'en'-English, 'japan'-Japanese, etc.)
+    Returns:
+        Recognized text in original line format
     """
-    # 初始化 PaddleOCR
+    # Initialize PaddleOCR
     ocr = PaddleOCR(use_angle_cls=True, lang=lang)
 
-    # 进行 OCR 识别
+    # Perform OCR recognition
     result = ocr.ocr(image_path, cls=True)
 
-    # 按行组织识别结果
+    # Organize recognition results by line
     lines = []
     if result and len(result) > 0:
-        # 按y坐标排序，保持行顺序
+        # Sort by y-coordinate to maintain line order
         sorted_lines = sorted(result[0], key=lambda line: line[0][0][1])
 
         current_line_y = None
@@ -30,7 +31,7 @@ def extract_text_from_image(image_path, lang='ch'):
             _, (text, _) = line
             y_pos = line[0][0][1]
 
-            # 如果y坐标变化超过一定阈值，视为新行
+            # If y-coordinate changes beyond a certain threshold, consider it a new line
             if current_line_y is None or abs(y_pos - current_line_y) > 20:
                 if current_line_text:
                     lines.append(' '.join(current_line_text))
@@ -44,31 +45,43 @@ def extract_text_from_image(image_path, lang='ch'):
     return '\n'.join(lines)
 
 
+def ensure_directory_exists(directory):
+    """Ensure the directory exists, create it if not"""
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
 def main():
-    # 设置命令行参数
-    parser = argparse.ArgumentParser(description='使用PaddleOCR识别图片中的文字')
-    parser.add_argument('--image', required=True, help='要识别的图片路径')
+    # Set command-line arguments
+    parser = argparse.ArgumentParser(description='Use PaddleOCR to recognize text in an image')
+    parser.add_argument('--image', required=True, help='Path to the image to be recognized')
     parser.add_argument('--lang', default='ch',
-                        help='识别语言: ch-中文(默认), en-英文, japan-日文, french-法文, german-德文, korean-韩文')
+                        help='Recognition language: ch-Chinese (default), en-English, japan-Japanese, french-French, german-German, korean-Korean')
+    parser.add_argument('--output_path', required=True,
+                        help='Path to the directory where the result file will be saved')
 
     args = parser.parse_args()
 
     try:
-        # 提取文字
+        # Extract text
         result = extract_text_from_image(args.image, args.lang)
 
-        # 打印结果
-        print("识别结果(保持行格式):")
-        print(result)
+        # Ensure the output directory exists
+        ensure_directory_exists(args.output_path)
 
-        # 保存结果到文件(可选)
-        output_path = args.image.rsplit('.', 1)[0] + '_result.txt'
-        with open(output_path, 'w', encoding='utf-8') as f:
+        # Generate output file name
+        image_name = os.path.basename(args.image)
+        output_filename = f"{os.path.splitext(image_name)[0]}_result.txt"
+        output_filepath = os.path.join(args.output_path, output_filename)
+
+        # Save result to file
+        with open(output_filepath, 'w', encoding='utf-8') as f:
             f.write(result)
-        print(f"\n结果已保存到: {output_path}")
+
+        print(f"Recognition completed, result saved to: {output_filepath}")
 
     except Exception as e:
-        print(f"识别过程中出错: {str(e)}")
+        print(f"Error during recognition: {str(e)}")
 
 
 if __name__ == '__main__':
