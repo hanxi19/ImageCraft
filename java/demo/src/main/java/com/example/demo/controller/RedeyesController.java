@@ -40,7 +40,7 @@ public class RedeyesController {
 
     @Autowired
     public RedeyesController(
-            @Value("${file.upload-dir.redeyes.resImg}") String oriImgDir,
+            @Value("${file.upload-dir.redeyes.oriImg}") String oriImgDir,
             @Value("${file.upload-dir.redeyes.resImg}") String resImgDir) {
 
         this.oriImgDir = Paths.get(oriImgDir).toAbsolutePath().normalize();
@@ -184,7 +184,7 @@ public class RedeyesController {
             }
         } catch (Exception e) {
             // 异常处理
-            log.error("图片去划痕处理异常", e);
+            log.error("图片去红眼处理异常", e);
             response.put("code", 0);
             response.put("msg", "服务器内部错误");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
