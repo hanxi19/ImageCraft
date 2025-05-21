@@ -4,6 +4,7 @@ import com.example.demo.pojo.OcrBean;
 import com.example.demo.service.OcrService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +21,16 @@ import java.util.Arrays;
 public class Ocrservice1 implements OcrService {
     private final Path runScriptPath;
     private final Path resTxtDir;
+    private final Path condaPath;
 
     @Autowired
     public Ocrservice1(
             @Value("${file.OCR.del}") String runScriptPath,
-            @Value("${file.upload-dir.ocr.resTxt}") String resTxtDir) {
+            @Value("${file.upload-dir.ocr.resTxt}") String resTxtDir,
+            @Qualifier("segment_ocr_translate_conda") Path condaPath) {
         this.runScriptPath = Paths.get(runScriptPath).toAbsolutePath().normalize();
         this.resTxtDir = Paths.get(resTxtDir).toAbsolutePath().normalize();
+        this.condaPath = condaPath;
         log.info("OCR服务初始化完成，脚本路径: {}, 结果目录: {}", this.runScriptPath, this.resTxtDir);
     }
 
@@ -34,7 +38,7 @@ public class Ocrservice1 implements OcrService {
     public boolean runOcrScript(OcrBean ocrBean) {
         String[] command = {
                 "cmd.exe", "/c",
-                "conda", "activate", "D:\\miniconda\\envs\\pdf", "&&",
+                "conda activate " + condaPath.toString() + " && ",
                 "python",
                 runScriptPath.toString(),
                 "--image", ocrBean.getImageUrl(),

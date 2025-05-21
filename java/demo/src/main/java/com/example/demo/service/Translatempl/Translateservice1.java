@@ -4,6 +4,7 @@ import com.example.demo.pojo.OcrBean;
 import com.example.demo.service.TranslateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,17 +24,20 @@ public class Translateservice1 implements TranslateService {
     private final Path transTxtDir;
     private final String secretId;
     private final String secretKey;
+    private final Path condaPath;
 
     @Autowired
     public Translateservice1(
             @Value("${file.Translate.del}") String runScriptPath,
             @Value("${file.upload-dir.ocr.transTxt}") String transTxtDir,
             @Value("${tencent.cloud.secretId}") String secretId,
-            @Value("${tencent.cloud.secretKey}") String secretKey) {
+            @Value("${tencent.cloud.secretKey}") String secretKey,
+            @Qualifier("segment_ocr_translate_conda") Path condaPath) {
         this.runScriptPath = Paths.get(runScriptPath).toAbsolutePath().normalize();
         this.transTxtDir = Paths.get(transTxtDir).toAbsolutePath().normalize();
         this.secretId = secretId;
         this.secretKey = secretKey;
+        this.condaPath = condaPath;
         log.info("翻译服务初始化完成，脚本路径: {}, 结果目录: {}", this.runScriptPath, this.transTxtDir);
     }
 
@@ -47,7 +51,7 @@ public class Translateservice1 implements TranslateService {
 
         String[] command = {
                 "cmd.exe", "/c",
-                "conda", "activate", "D:\\miniconda\\envs\\pdf", "&&",
+                "conda activate " + condaPath.toString() + " && ",
                 "python",
                 runScriptPath.toString(),
                 "--input_file", ocrBean.getOcr_result_txt(),
