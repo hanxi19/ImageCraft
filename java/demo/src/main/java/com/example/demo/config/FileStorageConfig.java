@@ -14,7 +14,7 @@ public class FileStorageConfig {
     @Value("${file.root-dir}")
     private String rootDir;
 
-    @Value("{file.segment_ocr_translate.conda}")
+    @Value("$ile.segment_ocr_translate.conda}")
     private String segment_ocr_translate_conda;
 
     // Deepfill 相关路径
