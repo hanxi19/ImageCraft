@@ -14,6 +14,9 @@ public class FileStorageConfig {
     @Value("${file.root-dir}")
     private String rootDir;
 
+    @Value("$ile.segment_ocr_translate.conda}")
+    private String segment_ocr_translate_conda;
+
     // Deepfill 相关路径
     @Value("${file.upload-dir.deepfill.segImg}")
     private String deepfillSegImgLocation;
@@ -56,6 +59,9 @@ public class FileStorageConfig {
     @Value("${file.upload-dir.segment.resImg}")
     private String segmentResImgLocation;
 
+    @Value("${file.segment.checkpoint}")
+    private String segmentWeightFileLocation;
+
     //Ocr相关路径
     @Value("${file.upload-dir.ocr.oriImg}")
     private String ocrOriImgLocation;
@@ -72,6 +78,10 @@ public class FileStorageConfig {
     public Path rootPath() {
         return createDir(rootDir);
     }
+
+    //segment_ocr_translate conda path Bean
+    @Bean(name = "segment_ocr_translate_conda")
+    public Path segment_ocr_translate_conda(){ return createDir(segment_ocr_translate_conda);}
 
     // stylegan Bean
     @Bean(name = "styleganResImgPath")
@@ -137,6 +147,15 @@ public class FileStorageConfig {
     @Bean(name = "segmentResImgPath")
     public Path segmentResImgPath() {
         return createDir(segmentResImgLocation);
+    }
+
+    @Bean(name = "segmentWeightFileLocation")
+    public Path segmentWeightFileLocation() {
+        Path weightPath = Paths.get(segmentWeightFileLocation).toAbsolutePath().normalize();
+        if (!Files.exists(weightPath)) {
+            throw new IllegalStateException("权重文件不存在: " + weightPath);
+        }
+        return weightPath;
     }
 
     // Ocr Bean
