@@ -26,6 +26,7 @@ public class Segmentservice1 implements SegmentService {
     private final Path checkpointPath; // 固定权重文件路径
     private final Path condaPath;
 
+
     @Autowired
     public Segmentservice1(
             @Value("${file.segment.del}") String runScriptPath,
@@ -33,13 +34,13 @@ public class Segmentservice1 implements SegmentService {
             @Value("${file.upload-dir.segment.oriImg}") String oriImgDir,
             @Value("${file.upload-dir.segment.resImg}") String resImgDir,
             @Value("${file.segment.checkpoint}") String checkpointPath,
-            @Qualifier("segment_ocr_translate_conda") Path condaPath) {
+            @Value("${file.segment_ocr_translate.conda}") String condaPath) {
         this.runScriptPath = Paths.get(runScriptPath).toAbsolutePath().normalize();
         this.root = Paths.get(root).toAbsolutePath().normalize();
         this.oriImgDir = Paths.get(oriImgDir).toAbsolutePath().normalize();
         this.resImgDir = Paths.get(resImgDir).toAbsolutePath().normalize();
         this.checkpointPath = Paths.get(checkpointPath).toAbsolutePath().normalize();
-        this.condaPath = condaPath;
+        this.condaPath = Paths.get(condaPath).toAbsolutePath().normalize();
 
         log.info("Segment服务初始化完成，脚本路径: {}", this.runScriptPath);
     }

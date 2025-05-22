@@ -72,12 +72,19 @@ public class FileStorageConfig {
     @Value("${file.upload-dir.ocr.transTxt}")
     private String ocrTransTxtLocation;
 
+    @Value("${file.segment_ocr_translate.conda}")
+    private String ocrCondaLocation;
+
 
     // root Bean
     @Bean(name = "rootPath")
     public Path rootPath() {
         return createDir(rootDir);
     }
+
+    // ocrCondaPath
+    @Bean(name = "ocrCondaPath")
+    public Path ocrCondaPath(){ return createDir(ocrCondaLocation);}
 
     //segment_ocr_translate conda path Bean
     @Bean(name = "segment_ocr_translate_conda")

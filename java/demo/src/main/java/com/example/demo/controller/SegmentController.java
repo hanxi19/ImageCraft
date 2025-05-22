@@ -136,8 +136,18 @@ public class SegmentController {
             for (Object point : (List<?>) pointsObj) {
                 if (point instanceof Number) {
                     keyPoints.add(((Number) point).doubleValue());
+                } else if (point instanceof Map) {
+                    Map<?, ?> map = (Map<?, ?>) point;
+                    Object xObj = map.get("x");
+                    Object yObj = map.get("y");
+                    if (xObj instanceof Number && yObj instanceof Number) {
+                        keyPoints.add(((Number) xObj).doubleValue());
+                        keyPoints.add(((Number) yObj).doubleValue());
+                    } else {
+                        throw new IllegalArgumentException("坐标点x/y必须是数字类型");
+                    }
                 } else {
-                    throw new IllegalArgumentException("坐标点必须是数字类型");
+                    throw new IllegalArgumentException("坐标点必须是数字类型或包含x/y的对象");
                 }
             }
 
