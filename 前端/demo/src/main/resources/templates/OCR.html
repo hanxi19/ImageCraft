@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <link rel="stylesheet" th:href="@{/homee.css}" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCR文字识别与翻译系统</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* 保持第一个示例的CSS变量和样式 */
+    :root {
+      --primary-color: #4361ee;
+      --primary-light: #6b85f1;
+      --secondary-color: #3f37c9;
+      --success-color: #4cc9f0;
+      --warning-color: #ffbe0b;
+      --danger-color: #ff5a5f;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --gray-color: #6c757d;
+      --border-radius: 10px;
+      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .main-container {
+      margin-right: 20px; /* 减少右侧边距 */
+      margin-left: 20px; /* 增加左侧边距 */
+      max-width: calc(100%); /* 动态计算最大宽度 */
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin-bottom: 30px;
+      position: relative;
+      display: inline-block;
+      padding-bottom: 10px;
+      text-align: center;
+      width: 100%;
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(to right, var(--primary-color), var(--success-color));
+      border-radius: 2px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 25px;
+      margin-bottom: 25px;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-button {
+      border: 2px dashed #d1d5db;
+      border-radius: var(--border-radius);
+      padding: 35px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+      background-color: rgba(67, 97, 238, 0.03);
+    }
+
+    .file-input-button:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.08);
+    }
+
+    .file-input-button i {
+      font-size: 2.2rem;
+      color: var(--primary-color);
+      margin-bottom: 12px;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      width: auto;
+      min-width: 150px;
+      box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
+      margin: 5px;
+    }
+
+    .btn:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+    }
+
+    .status {
+      padding: 14px;
+      border-radius: var(--border-radius);
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      font-size: 0.95rem;
+      border-left: 4px solid transparent;
+    }
+
+    .status i {
+      margin-right: 12px;
+      font-size: 1.2rem;
+    }
+
+    .status-pending {
+      background-color: rgba(255, 190, 11, 0.1);
+      color: #b38b00;
+      border-left-color: var(--warning-color);
+    }
+
+    .status-success {
+      background-color: rgba(76, 201, 240, 0.1);
+      color: #007a99;
+      border-left-color: var(--success-color);
+    }
+
+    .status-error {
+      background-color: rgba(255, 90, 95, 0.1);
+      color: #cc0000;
+      border-left-color: var(--danger-color);
+    }
+
+    .status-info {
+      background-color: rgba(67, 97, 238, 0.1);
+      color: var(--primary-color);
+      border-left-color: var(--primary-color);
+    }
+
+    .tab-container {
+      display: flex;
+      margin: 15px 0;
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    .tab {
+      padding: 12px 30px;
+      cursor: pointer;
+      background-color: transparent;
+      color: var(--gray-color);
+      transition: var(--transition);
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      position: relative;
+    }
+
+    .tab.active {
+      color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.1);
+    }
+
+    .tab-content {
+      display: none;
+      padding: 20px 0;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .text-area {
+      width: 100%;
+      min-height: 200px;
+      padding: 15px;
+      border: 2px solid #e9ecef;
+      border-radius: var(--border-radius);
+      font-family: 'Poppins', sans-serif;
+      resize: vertical;
+      transition: var(--transition);
+    }
+
+    .text-area:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .language-selector {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    select {
+      padding: 8px 12px;
+      border-radius: var(--border-radius);
+      border: 2px solid #e9ecef;
+      background-color: white;
+      font-family: 'Poppins', sans-serif;
+      transition: var(--transition);
+    }
+
+    select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .image-preview {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--border-radius);
+      margin-top: 15px;
+      box-shadow: var(--box-shadow);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .btn {
+        width: 100%;
+        margin: 5px 0;
+      }
+
+      .tab-container {
+        flex-wrap: wrap;
+      }
+
+      .tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+
+</head>
+<body>
+<nav class="fixed-nav">
+  <div class="nav-container">
+    <!-- 左侧标题 -->
+    <h2>ImageCraft 图艺工坊</h2>
+
+    <!-- 右侧登录注册 -->
+    <div class="auth-links">
+      <a th:href="@{/changepassword}">修改密码</a>
+      <a th:href="@{/login}">退出登录</a>
+    </div>
+  </div>
+</nav>
+
+<!-- 左侧功能导航 -->
+
+<div class="features-container">
+  <nav class="features-nav">
+    <a href="Picture_croppingmem" class="feature-btn">
+      <span class="btn-text">图片裁剪</span>
+    </a>
+    <a href="Compressmem" class="feature-btn">
+      <span class="btn-text">图片压缩</span>
+    </a>
+    <a href="Conversionmem" class="feature-btn">
+      <span class="btn-text">格式转换</span>
+    </a>
+    <a href="Test_Addedmem" class="feature-btn">
+      <span class="btn-text">添加文字</span>
+    </a>
+    <a href="GIFmem" class="feature-btn">
+      <span class="btn-text">生成GIF</span>
+    </a>
+    <a href="scratchTest3" class="feature-btn">
+      <span class="btn-text">图片去划痕</span>
+    </a>
+    <a href="redeyesTest1" class="feature-btn">
+      <span class="btn-text">图片去红眼</span>
+    </a>
+    <a href="deepfill" class="feature-btn">
+      <span class="btn-text">水印与物体去除</span>
+    </a>
+    <a href="stylegabtest2" class="feature-btn">
+      <span class="btn-text">图片生成</span>
+    </a>
+    <a href="denoisingTest" class="feature-btn">
+      <span class="btn-text">图片去噪点</span>
+    </a>
+    <a href="OCR" class="feature-btn">
+      <span class="btn-text">文字识别</span>
+    </a>
+    <a href="SAM" class="feature-btn">
+      <span class="btn-text">图像分割</span>
+    </a>
+  </nav>
+</div>
+
+<!-- 功能内容区 -->
+<div class="main-container">
+  <h1>OCR文字识别与翻译系统</h1>
+
+  <!-- 在HTML部分修改上传区域 -->
+  <div class="card">
+    <div class="upload-section">
+      <div class="file-input-wrapper">
+        <form id="uploadForm">
+          <div class="file-input-button">
+            <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--primary-color); margin-bottom: 15px;"></i>
+            <p style="color: var(--gray-color); margin-bottom: 20px;">拖放图片或点击上传 (JPG/PNG, 最大5MB)</p>
+            <input type="file" id="imageUpload" name="image" accept="image/*" required style="display: none;">
+            <button type="button" class="btn" onclick="document.getElementById('imageUpload').click()">
+              <i class="fas fa-folder-open"></i> 选择文件
+            </button>
+          </div>
+        </form>
+      </div>
+      <div id="uploadStatus" class="status-box"></div>
+    </div>
+
+    <div class="language-selector">
+      <label>源语言:</label>
+      <select id="sourceLanguage">
+        <option value="ch">中文</option>
+        <option value="en">英文</option>
+        <option value="ja">日文</option>
+      </select>
+    </div>
+
+    <div id="imagePreviewContainer" style="display: none;">
+      <h3>上传的图片:</h3>
+      <img id="imagePreview" class="image-preview">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>文字识别与翻译</h2>
+    <div class="language-selector">
+      <label>目标语言:</label>
+      <select id="targetLanguage">
+        <option value="en">英文</option>
+        <option value="ja">日文</option>
+        <option value="ko">韩文</option>
+        <option value="fr">法文</option>
+        <option value="de">德文</option>
+      </select>
+    </div>
+
+    <button class="btn" id="recognizeBtn" disabled>
+      <i class="fas fa-eye"></i> 识别文字
+    </button>
+
+    <div id="recognizeStatus" class="status status-info">
+      <i class="fas fa-info-circle"></i>
+      <span>等待图片上传</span>
+    </div>
+
+    <div class="tab-container">
+      <div class="tab active" data-tab="ocr">OCR识别结果</div>
+      <div class="tab" data-tab="translation">翻译结果</div>
+    </div>
+
+    <div id="ocrTab" class="tab-content active">
+      <h3>OCR识别结果 (可编辑):</h3>
+      <textarea id="ocrTextArea" class="text-area" placeholder="识别结果将显示在这里..." disabled></textarea>
+      <div class="button-group">
+        <button class="btn" id="saveEditBtn" disabled>
+          <i class="fas fa-save"></i> 保存修改
+        </button>
+        <button class="btn" id="translateBtn" disabled>
+          <i class="fas fa-language"></i> 翻译文本
+        </button>
+      </div>
+    </div>
+
+    <div id="translationTab" class="tab-content">
+      <h3>翻译结果:</h3>
+      <div id="translationResult" class="text-area" style="min-height: 150px;" readonly>
+        翻译结果将显示在这里...
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const STATUS_STYLE = {
+    SUCCESS: 'status-success',
+    ERROR: 'status-error'
+  };
+
+  function initStatus(element) {
+    element.className = 'status-box';
+    element.innerHTML = '';
+  }
+
+  function showStatus(element, message, style = '') {
+    initStatus(element);
+    element.classList.add(style);
+    element.innerHTML = `
+        <i class="fas fa-spinner fa-pulse"></i>
+        <span>${message}</span>
+    `;
+  }
+
+  function showSuccess(element, message) {
+    initStatus(element);
+    element.classList.add(STATUS_STYLE.SUCCESS);
+    element.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        <span>${message}</span>
+    `;
+  }
+
+  function showError(element, message) {
+    initStatus(element);
+    element.classList.add(STATUS_STYLE.ERROR);
+    element.innerHTML = `
+        <i class="fas fa-exclamation-circle"></i>
+        <span>${message}</span>
+    `;
+  }
+
+  let currentFilename = null;
+  let currentOcrResultPath = null;
+  let currentTranslateResultPath = null;
+  document.getElementById('imageUpload').addEventListener('change', async function(event) {
+    const file = event.target.files[0];
+    const uploadStatus = document.getElementById('uploadStatus');
+    const recognizeBtn = document.getElementById('recognizeBtn');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+    if (!file) return;
+
+    showStatus(uploadStatus, '正在上传图片...');
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await fetch('/ocr/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.code === 1) {
+        showSuccess(uploadStatus, '图片上传成功！');
+        currentFilename = result.data.filename;
+
+        // 显示预览图片
+        const imagePreview = document.getElementById('imagePreview');
+        imagePreview.src = URL.createObjectURL(file);
+        imagePreviewContainer.style.display = 'block';
+
+        // 启用识别按钮
+        recognizeBtn.disabled = false;
+      } else {
+        showError(uploadStatus, `上传失败: ${result.msg}`);
+        recognizeBtn.disabled = true;
+      }
+    } catch (error) {
+      showError(uploadStatus, `上传失败: ${error.message}`);
+      recognizeBtn.disabled = true;
+    }
+  });
+
+  // 识别文字
+  document.getElementById('recognizeBtn').addEventListener('click', async function() {
+    if (!currentFilename) {
+      showStatus(document.getElementById('recognizeStatus'), '请先上传图片', 'error');
+      return;
+    }
+
+    const recognizeStatus = document.getElementById('recognizeStatus');
+    const ocrTextArea = document.getElementById('ocrTextArea');
+    const saveEditBtn = document.getElementById('saveEditBtn');
+    const translateBtn = document.getElementById('translateBtn');
+    const sourceLang = document.getElementById('sourceLanguage').value;
+
+    try {
+      showStatus(recognizeStatus, '识别中...');
+
+      // 调用识别接口
+      const recognizeResponse = await fetch('/ocr/recognize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          imageUrl: `/ocr/images/${currentFilename}`,
+          lang: sourceLang
+        })
+      });
+
+      const recognizeResult = await recognizeResponse.json();
+
+      if (recognizeResult.code === 1) {
+        showStatus(recognizeStatus, '识别成功', 'success');
+        currentOcrResultPath = recognizeResult.data.ocr_result_txt;
+
+        // 获取识别结果内容
+        const contentResponse = await fetch(`/ocr/result/content?resultFilePath=${encodeURIComponent(currentOcrResultPath)}`);
+        const contentResult = await contentResponse.json();
+
+        if (contentResult.code === 1) {
+          ocrTextArea.value = contentResult.data;
+          ocrTextArea.disabled = false;
+          saveEditBtn.disabled = false;
+          translateBtn.disabled = false;
+        } else {
+          ocrTextArea.value = '获取识别结果失败: ' + (contentResult.msg || '未知错误');
+        }
+      } else {
+        showStatus(recognizeStatus, recognizeResult.msg || '识别失败', 'error');
+        ocrTextArea.value = '识别失败: ' + (recognizeResult.msg || '未知错误');
+      }
+    } catch (error) {
+      showStatus(recognizeStatus, '识别失败: ' + error.message, 'error');
+      ocrTextArea.value = '识别过程中发生错误: ' + error.message;
+    }
+  });
+
+  // 保存编辑
+  document.getElementById('saveEditBtn').addEventListener('click', async function() {
+    if (!currentOcrResultPath) {
+      alert('没有可保存的OCR结果');
+      return;
+    }
+
+    const ocrTextArea = document.getElementById('ocrTextArea');
+    const editedText = ocrTextArea.value;
+
+    try {
+      const response = await fetch('/ocr/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ocrResultPath: currentOcrResultPath,
+          editedText: editedText,
+          targetLang: document.getElementById('targetLanguage').value
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.code === 1) {
+        showStatus(document.getElementById('recognizeStatus'), '修改已保存', 'success');
+      } else {
+        throw new Error(result.msg || '保存失败');
+      }
+    } catch (error) {
+      showStatus(document.getElementById('recognizeStatus'), '保存失败: ' + error.message, 'error');
+    }
+  });
+
+  // 翻译文本
+  document.getElementById('translateBtn').addEventListener('click', async function() {
+    if (!currentOcrResultPath) {
+      showStatus(document.getElementById('recognizeStatus'), '没有可翻译的文本', 'error');
+      return;
+    }
+
+    const ocrTextArea = document.getElementById('ocrTextArea');
+    const editedText = ocrTextArea.value;
+    const targetLang = document.getElementById('targetLanguage').value;
+    const translationResult = document.getElementById('translationResult');
+    const recognizeStatus = document.getElementById('recognizeStatus');
+
+    try {
+      showStatus(recognizeStatus, '翻译中...');
+
+      // 1. 先保存编辑
+      const saveResponse = await fetch('/ocr/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ocrResultPath: currentOcrResultPath,
+          editedText: editedText,
+          targetLang: targetLang
+        })
+      });
+
+      const saveResult = await saveResponse.json();
+
+      if (saveResult.code !== 1) {
+        throw new Error(saveResult.msg || '保存编辑文本失败');
+      }
+
+      // 2. 获取翻译结果
+      if (saveResult.data && saveResult.data.translateResultPath) {
+        currentTranslateResultPath = saveResult.data.translateResultPath;
+
+        const contentResponse = await fetch(`/ocr/translate/content?resultFilePath=${encodeURIComponent(currentTranslateResultPath)}`);
+        const contentResult = await contentResponse.json();
+
+        if (contentResult.code === 1) {
+          translationResult.textContent = contentResult.data;
+          showStatus(recognizeStatus, '翻译成功', 'success');
+
+          // 切换到翻译结果标签页
+          document.querySelector('.tab[data-tab="translation"]').click();
+        } else {
+          throw new Error(contentResult.msg || '获取翻译结果失败');
+        }
+      } else {
+        throw new Error('未返回翻译结果路径');
+      }
+    } catch (error) {
+      showStatus(recognizeStatus, '翻译失败: ' + error.message, 'error');
+      translationResult.textContent = '翻译过程中发生错误: ' + error.message;
+    }
+  });
+
+  function showStatus(element, message, type = '') {
+    element.textContent = message;
+    element.className = 'status';
+    if (type) {
+      element.classList.add(type);
+    }
+  }
+</script>
+</body>
+</html>
