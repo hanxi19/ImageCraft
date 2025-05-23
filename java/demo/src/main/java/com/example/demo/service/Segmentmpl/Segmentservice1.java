@@ -4,6 +4,7 @@ import com.example.demo.pojo.SegmentBean;
 import com.example.demo.service.SegmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,8 @@ public class Segmentservice1 implements SegmentService {
     private final Path resImgDir;
     private final String modelType = "vit_b"; // 固定模型类型
     private final Path checkpointPath; // 固定权重文件路径
+    private final Path condaPath;
+
 
     @Autowired
     public Segmentservice1(
@@ -30,12 +33,14 @@ public class Segmentservice1 implements SegmentService {
             @Value("${file.root-dir}") String root,
             @Value("${file.upload-dir.segment.oriImg}") String oriImgDir,
             @Value("${file.upload-dir.segment.resImg}") String resImgDir,
-            @Value("${file.segment.checkpoint}") String checkpointPath) {
+            @Value("${file.segment.checkpoint}") String checkpointPath,
+            @Value("${file.segment_ocr_translate.conda}") String condaPath) {
         this.runScriptPath = Paths.get(runScriptPath).toAbsolutePath().normalize();
         this.root = Paths.get(root).toAbsolutePath().normalize();
         this.oriImgDir = Paths.get(oriImgDir).toAbsolutePath().normalize();
         this.resImgDir = Paths.get(resImgDir).toAbsolutePath().normalize();
         this.checkpointPath = Paths.get(checkpointPath).toAbsolutePath().normalize();
+        this.condaPath = Paths.get(condaPath).toAbsolutePath().normalize();
 
         log.info("Segment服务初始化完成，脚本路径: {}", this.runScriptPath);
     }
@@ -48,7 +53,7 @@ public class Segmentservice1 implements SegmentService {
         // 构建 Python 命令
         String[] command = {
                 "cmd.exe", "/c", // 使用 cmd 执行命令
-                "conda activate D:\\miniconda\\envs\\pdf && ", // 激活conda环境
+                "conda activate " + condaPath.toString() + " && ", // 激活conda环境
                 "python",
                 runScriptPath.toString(),
                 "--image", segmentBean.getImageUrl(),

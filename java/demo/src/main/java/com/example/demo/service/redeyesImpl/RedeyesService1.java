@@ -21,16 +21,19 @@ public class RedeyesService1 implements RedeyesService {
     private final Path root;
     private final Path oriImgDir;
     private final Path resImgDir;
+    private final Path condaPath;
     @Autowired
     public RedeyesService1(
             @Value("${file.redeyes.del}") String runScriptPath,
             @Value("${file.root-dir}") String root,
             @Value("${file.upload-dir.redeyes.oriImg}") String oriImgDir,
-            @Value("${file.upload-dir.redeyes.resImg}") String resImgDir) {
+            @Value("${file.upload-dir.redeyes.resImg}") String resImgDir,
+            @Value("${file.conda}") String condaPath) {
         this.runScriptPath = Paths.get(runScriptPath).toAbsolutePath().normalize();
         this.root = Paths.get(root).toAbsolutePath().normalize();
         this.oriImgDir = Paths.get(oriImgDir).toAbsolutePath().normalize();
         this.resImgDir = Paths.get(resImgDir).toAbsolutePath().normalize();
+        this.condaPath = Paths.get(condaPath).toAbsolutePath().normalize();
     }
     @Override
     public boolean runRedeyesScript(RedeyesBean redeyesBean) {
@@ -39,7 +42,7 @@ public class RedeyesService1 implements RedeyesService {
         String[] command = {
                 "cmd.exe", "/c", // 使用 cmd 执行命令
 //            "E:\\develop\\web\\ImageCraft\\python\\Bringing-Old-Photos-Back-to-Life\\venv\\Scripts\\activate && " + // 激活虚拟环境
-                "conda activate E:\\develop\\web\\ImageCraft\\python\\imgc && ",
+                "conda activate " + condaPath+" && ",
                 // pythonPath.toString(),
                 "python",
                 runScriptPath.toString(),

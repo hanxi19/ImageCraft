@@ -13,11 +13,23 @@ public class EnvConfig {
     @Value("${file.python}")
     private String pythonPath;
 
+    @Value("${file.conda}")
+    private String condaPath;
+
     @Bean(name = "pythonPath")
     public Path pythonPath() {
         Path scriptPath = Paths.get(pythonPath).toAbsolutePath().normalize();
         if (!Files.exists(scriptPath)) {
             throw new IllegalStateException("Python脚本不存在: " + scriptPath);
+        }
+        return scriptPath;
+    }
+
+    @Bean(name = "condaPath")
+    public Path condaPath() {
+        Path scriptPath = Paths.get(condaPath).toAbsolutePath().normalize();
+        if (!Files.exists(scriptPath)) {
+            throw new IllegalStateException("conda环境不存在: " + scriptPath);
         }
         return scriptPath;
     }

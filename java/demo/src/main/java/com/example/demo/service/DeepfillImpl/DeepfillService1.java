@@ -21,18 +21,21 @@ public class DeepfillService1 implements DeepfillService {
     private final Path oriImgDir;
     private final Path fillImgDir;
     private final Path segImgDir;
+    private final Path condaPath;
     @Autowired
     public DeepfillService1(
             @Value("${file.deepfill.test}") String testScriptPath,
             @Value("${file.deepfill.weight}") String weightPath,
             @Value("${file.upload-dir.deepfill.oriImg}") String oriImgDir,
             @Value("${file.upload-dir.deepfill.segImg}") String segImgDir,
-            @Value("${file.upload-dir.deepfill.fillImg}") String fillImgDir) {
+            @Value("${file.upload-dir.deepfill.fillImg}") String fillImgDir,
+            @Value("${file.conda}") String condaPath) {
         this.testScriptPath = Paths.get(testScriptPath).toAbsolutePath().normalize();
         this.oriImgDir = Paths.get(oriImgDir).toAbsolutePath().normalize();
         this.segImgDir = Paths.get(segImgDir).toAbsolutePath().normalize();
         this.fillImgDir = Paths.get(fillImgDir).toAbsolutePath().normalize();
         this.weightPath = Paths.get(weightPath).toAbsolutePath().normalize();
+        this.condaPath = Paths.get(condaPath).toAbsolutePath().normalize();
     }
     @Override
     public boolean runDeepfillScript(DeepfillBean deepfillBean) {
@@ -40,7 +43,7 @@ public class DeepfillService1 implements DeepfillService {
         String[] command = {
                 "cmd.exe", "/c", // 使用 cmd 执行命令
 //            "E:\\develop\\web\\ImageCraft\\python\\Bringing-Old-Photos-Back-to-Life\\venv\\Scripts\\activate && " + // 激活虚拟环境
-                "conda activate E:\\develop\\web\\ImageCraft\\python\\imgc && ",
+                "conda activate " + condaPath+" && ",
                 // pythonPath.toString(),
                 "python",
                 testScriptPath.toString(),
