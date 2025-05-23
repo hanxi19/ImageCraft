@@ -1,49 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <title>图艺工坊</title>
-<!--  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">-->
-  <link rel="stylesheet" th:href="@{/styles.css}">
-  <style type="text/css">
-  .container p a {
-	font-size: 24px;
-}
-  .container p {
-	font-size: 24px;
-}
-  </style>
+    <meta charset="UTF-8">
+    <title>图艺工坊</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+
 </head>
 <body>
-<div class="container">
-<h1>图艺工坊</h1>
-{% if current_user.is_authenticated %}
-<p align="center">欢迎, {{ current_user.username }}!<br>
-  <br>
-  <a href="{{ url_for('logout') }}">退出登录</a>&nbsp; &nbsp; &nbsp; &nbsp; <a th:href="@{/history}">查看历史记录</a></p>
-{% else %}
-<!--<p align="center"><a href="{{ url_for('/register') }}">注册</a>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;<a href="{{ url_for('/login') }}">登录</a></p>-->
-  <p align="center"><a th:href="@{/register}">注册</a>&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;
-    <a th:href="@{/login}">登录</a>
-  {% endif %}<br>
-<br>
-<br>
-<br>
-<div class="button-container">
-    <div align="center">
-      <button type="submit">提交</button>
-      <br>
-      <br>
+    <!-- 新增固定导航栏 -->
+    <nav class="fixed-nav">
+        <div class="nav-container">
+<!--        	{% if current_user.username == 'root' %}-->
+                	<a th:href="@{/admin}">管理员面板</a>
+                    <a th:href="@{/index}">退出登录</a>
+                	<a th:href="@{/edit}">修改密码</a>
+
+<!--            {% elif current_user.is_authenticated %}-->
+            	<p align="center">欢迎, {{ current_user.username }}!</p>
+                <a th:href="@{/index}">退出登录</a>
+                <a th:href="@{/changepassword}">修改密码</a>
+                <a th:href="@{/edit}">图片裁剪</a>
+
+<!--            {% else %}-->
+                <a th:href="@{/register}">注册</a>
+                <a th:href="@{/logintest}">登录</a>
+                <a th:href="@{/edit}">图片裁剪</a>
+<!--            {% endif %}-->
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>图艺工坊</h1>
+
     </div>
-</div>
-<div align="center">输出: </div>
-<div id="resultArea"></div>
-</div>
-<!--<script src="{{ url_for('static', filename='script.js') }}"></script>-->
-<script th:src="@{/script.js}"></script>
+
+    <script th:src="@{/script.js}"></script>
 </body>
 </html>
-ml>-->
-
-

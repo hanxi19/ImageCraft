@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片裁剪 - 图艺工坊</title>
+    
+    <!-- 样式表 -->
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <style>
+        /* 新增预览容器样式 */
+        .image-preview-box {
+            width: 100%;
+            height: 400px;
+            background-color: #f0f0f0;
+            border: 2px dashed #ccc;
+            margin-top: 20px;
+            position: relative;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .upload-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 标题 -->
+        <h2 class="page-title">图片裁剪</h2>
+        
+        <!-- 上传表单 -->
+        <form method="post" enctype="multipart/form-data" id="cropForm">
+          <div class="form-group">
+                <label for="fileInput" class="form-label">选择图片：</label>
+                <input 
+                    type="file" 
+                    class="form-control" 
+                    name="file" 
+                    id="fileInput" 
+                    accept="image/*" 
+                    required
+                >
+            </div>
+            
+            <!-- 隐藏的裁剪参数 -->
+            <input type="hidden" name="x" id="x">
+            <input type="hidden" name="y" id="y">
+            <input type="hidden" name="width" id="width">
+            <input type="hidden" name="height" id="height">
+            <br>
+            
+            <div class="form-buttons">
+                <input type="submit" class="btn-submit" value="图片裁剪">
+                <input type="submit" class="btn-submit" value="格式转换">
+                <input type="submit" class="btn-submit" value="添加文字">
+                <input type="submit" class="btn-submit" value="图片压缩">
+                <input type="submit" class="btn-submit" value="转动图GIF">
+          </div>
+        </form>
+        
+        <!-- 图片预览容器 -->
+        <div class="preview-container">
+            <div class="image-preview-box">
+                <img id="previewImage" class="preview-image">
+                <div class="upload-hint">请选择图片</div>
+            </div>
+        </div>
+        <a href="{{ url_for('index') }}"><br><br>返回主页</a>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const fileInput = document.getElementById('fileInput');
+        const img = document.getElementById('previewImage');
+        const hint = document.querySelector('.upload-hint');
+        let cropper = null;
+
+        // 初始化空白画布
+        img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                // 隐藏提示文字
+                hint.style.display = 'none';
+                
+                // 销毁旧实例
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+                // 更新图片源
+                img.src = event.target.result;
+
+                // 初始化Cropper
+                cropper = new Cropper(img, {
+                    aspectRatio: NaN,
+                    viewMode: 1,
+                    guides: false,
+                    autoCropArea: 1,
+                    ready() {
+                        // 自动适应图片尺寸
+                        this.cropper.setCropBoxData({
+                            width: this.cropper.getContainerData().width,
+                            height: this.cropper.getContainerData().height
+                        });
+                    },
+                    crop(event) {
+                        const data = cropper.getData();
+                        document.getElementById('x').value = Math.round(data.x);
+                        document.getElementById('y').value = Math.round(data.y);
+                        document.getElementById('width').value = Math.round(data.width);
+                        document.getElementById('height').value = Math.round(data.height);
+                    }
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+    </script>
+
+</body>
+</html>

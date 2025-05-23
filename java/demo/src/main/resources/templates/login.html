@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户登录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36BFFA',
+                        neutral: '#F5F7FA',
+                        dark: '#1D2129',
+                        success: '#36D399',
+                        error: '#F87272',
+                        warning: '#FBBD23',
+                        info: '#3ABFF8'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+            }
+            .input-focus {
+                @apply focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300;
+            }
+            .btn-hover {
+                @apply hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300;
+            }
+            .toast-animation {
+                animation: toastIn 0.3s ease-out forwards, toastOut 0.3s ease-in forwards 6.7s; /* 修改这里，从4.7s改为6.7s */
+            }
+            .toast-enter {
+                @apply opacity-0 transform -translate-y-4;
+            }
+            .toast-enter-active {
+                @apply opacity-100 transform translate-y-0 transition-all duration-300;
+            }
+            .toast-exit {
+                @apply opacity-100;
+            }
+            .toast-exit-active {
+                @apply opacity-0 transform translate-y-[-10px] transition-all duration-300;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen font-inter flex items-center justify-center p-4">
+<!-- 消息提示框容器 -->
+<div id="toastContainer" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md"></div>
+
+<div class="w-full max-w-md">
+    <!-- 登录卡片 -->
+    <div class="bg-white rounded-2xl p-8 card-shadow relative overflow-hidden">
+        <!-- 装饰元素 -->
+        <div class="absolute -right-16 -top-16 w-32 h-32 bg-primary/10 rounded-full"></div>
+        <div class="absolute -left-10 -bottom-10 w-20 h-20 bg-secondary/10 rounded-full"></div>
+
+        <!-- 标题区域 -->
+        <div class="text-center mb-8 relative">
+            <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-dark mb-2">欢迎登录</h2>
+            <p class="text-gray-500">请输入账号密码完成登录</p>
+        </div>
+
+        <!-- 错误消息显示区域 -->
+        <div th:if="${error}"
+             class="bg-error/10 border-l-4 border-error text-error p-4 rounded mb-4 animate-fade-in"
+             style="animation: fadeIn 0.5s ease-in-out;">
+            <div class="flex items-center">
+                <i class="fa fa-exclamation-circle mr-3 text-lg"></i>
+                <span th:text="${error}">错误信息将显示在这里</span>
+            </div>
+        </div>
+
+        <!-- 表单 -->
+        <form id="loginForm" action="/logintest" method="post" class="space-y-5 relative">
+            <!-- 用户名 -->
+            <div class="form-group">
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fa fa-user"></i>
+                        </span>
+                    <input type="text" id="username" name="username" required
+                           class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 input-focus outline-none text-gray-700"
+                           placeholder="请输入用户名">
+                </div>
+            </div>
+
+            <!-- 密码 -->
+            <div class="form-group">
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fa fa-lock"></i>
+                        </span>
+                    <input type="password" id="password" name="password" required
+                           class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 input-focus outline-none text-gray-700"
+                           placeholder="请输入密码">
+                </div>
+            </div>
+
+            <!-- 验证码 -->
+            <div class="form-group">
+                <label for="captcha" class="block text-sm font-medium text-gray-700 mb-1">验证码</label>
+                <div class="flex items-center gap-3">
+                    <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                <i class="fa fa-shield"></i>
+                            </span>
+                        <input type="text" id="captcha" name="captcha" required
+                               class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 input-focus outline-none text-gray-700"
+                               placeholder="请输入验证码">
+                    </div>
+                    <div class="w-32 h-12 rounded-lg overflow-hidden border border-gray-200">
+                        <img src="/captcha" class="captcha-img w-full h-full object-cover" id="captchaImg"
+                             onclick="refreshCaptcha()" title="点击刷新"
+                             style="cursor: pointer; transition: transform 0.3s ease;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 登录按钮 -->
+            <button type="submit"
+                    class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg btn-hover flex items-center justify-center">
+                <span>登录</span>
+                <i class="fa fa-arrow-right ml-2"></i>
+            </button>
+        </form>
+
+        <!-- 底部链接 -->
+        <div class="mt-6 flex justify-between items-center">
+            <a th:href="@{/newtest}" class="text-sm text-primary hover:text-primary/80 transition-colors">忘记密码?</a>
+            <a th:href="@{/register}" class="text-sm text-primary hover:text-primary/80 transition-colors">立即注册</a>
+        </div>
+    </div>
+
+    <!-- 版权信息 -->
+    <p class="text-center text-gray-500 text-sm mt-6">© Image-Craft 版权所有</p>
+</div>
+
+<script>
+    // 刷新验证码
+    function refreshCaptcha() {
+        const img = document.getElementById('captchaImg');
+        // 添加旋转动画
+        img.classList.add('transform', 'rotate-6');
+        img.src = '/captcha?t=' + Date.now();
+
+        // 移除动画类
+        setTimeout(() => {
+            img.classList.remove('transform', 'rotate-6');
+        }, 300);
+    }
+
+    // 表单提交动画
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // 如果有Thymeleaf错误消息，先隐藏它
+        const thymeleafError = document.querySelector('[th\\:if="${error}"]');
+        if (thymeleafError) {
+            thymeleafError.style.display = 'none';
+        }
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> 登录中...';
+    });
+
+    // 显示提示消息
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+
+        // 创建提示框元素
+        const toast = document.createElement('div');
+
+        // 设置图标和背景颜色
+        let icon, bgColor, textColor;
+        switch(type) {
+            case 'success':
+                icon = 'fa-check-circle';
+                bgColor = 'bg-success';
+                textColor = 'text-white';
+                break;
+            case 'error':
+                icon = 'fa-times-circle';
+                bgColor = 'bg-error';
+                textColor = 'text-white';
+                break;
+            case 'warning':
+                icon = 'fa-exclamation-triangle';
+                bgColor = 'bg-warning';
+                textColor = 'text-white';
+                break;
+            case 'info':
+            default:
+                icon = 'fa-info-circle';
+                bgColor = 'bg-info';
+                textColor = 'text-white';
+                break;
+        }
+
+        // 设置提示框样式
+        toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-md rounded-lg px-4 py-3 ${bgColor} ${textColor} shadow-lg flex items-center toast-enter`;
+
+        // 设置提示框内容
+        toast.innerHTML = `
+                <i class="fa ${icon} mr-3 text-lg"></i>
+                <span>${message}</span>
+                <button class="ml-auto text-white opacity-80 hover:opacity-100" onclick="this.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+            `;
+
+        // 添加到容器
+        container.appendChild(toast);
+
+        // 触发动画
+        setTimeout(() => {
+            toast.classList.remove('toast-enter');
+            toast.classList.add('toast-enter-active');
+        }, 10);
+
+        // 5秒后自动消失
+        setTimeout(() => {
+            toast.classList.remove('toast-enter-active');
+            toast.classList.add('toast-exit-active');
+
+            // 动画结束后移除元素
+            setTimeout(() => {
+                container.removeChild(toast);
+            }, 300);
+        }, 5000);
+    }
+
+    // 添加淡入动画
+    document.addEventListener('DOMContentLoaded', function() {
+        // 检查是否有Thymeleaf错误消息需要显示
+        const thymeleafError = document.querySelector('[th\\:if="${error}"]');
+        if (thymeleafError && thymeleafError.textContent.trim() !== '') {
+            // 显示错误消息
+            thymeleafError.style.display = 'block';
+            // 添加淡入动画
+            setTimeout(() => {
+                thymeleafError.classList.add('opacity-100');
+            }, 10);
+        }
+    });
+</script>
+</body>
+</html>

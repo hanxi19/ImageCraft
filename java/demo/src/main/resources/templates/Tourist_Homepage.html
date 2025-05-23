@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>图艺工坊</title>
+    <link rel="stylesheet" th:href="@{/home.css}" />
+</head>
+<body>
+    <nav class="fixed-nav">
+        <div class="nav-container">
+        	<h2 align="left" style="text-align: center;">ImageCraft 图艺工坊</h2>
+          <div align="right">
+            <a th:href="@{/register}">注册</a>
+            <a th:href="@{/login}">登录</a>
+            <a th:href="@{/Picture_cropping}">图片裁剪</a>
+            <a th:href="@{/Compress}">图片压缩</a>
+            <a th:href="@{/Image_format_conversion}">图片格式转换</a>
+            <a th:href="@{/Add_text }">图片添加文字</a>
+            <a th:href="@{/GIF }">图片转gif动图</a>
+            
+          </div>
+      </div>
+    </nav>
+
+    <div class="container">
+    	<div class="container2">
+            <div class="image-column">
+                <div class="image-container">
+                  <img th:src="@{/images/0.png}" alt="示例图片" width="800" height="700">
+                </div>
+            </div>
+            <div class="text-column2"
+            style="flex: 1;
+    			min-width: 300px;
+    			display: flex;          /* 启用弹性布局 */
+    			flex-direction: column; /* 垂直排列子元素 */
+    			align-items: center;     /* 水平居中 */">
+                <h1 align="left">ImageCraft<br>
+        			图艺工坊</h1>
+                    
+                <h2 style="text-align: center;">
+                    在这里，你无需登录即可免费享受：<br>
+                    <br>
+					<a th:href="@{/Picture_cropping}">图片裁剪</a><br><br>
+
+            		<a th:href="@{/Compress}">图片压缩</a><br><br>
+
+            		<a th:href="@{/Image_format_conversion}">图片格式转换</a><br><br>
+
+            		<a th:href="@{/Add_text }">图片添加文字</a><br><br>
+
+            		<a th:href="@{/GIF }">图片转gif动图</a><br><br>
+            		<br>
+            		<br>
+                    
+                    登录后可免费享受下面功能：
+                </h2>
+            </div>
+        </div>
+        
+        
+        <div class="container1">
+            <div class="text-column">
+                <button class="btn" onclick="showPrompt()">
+        			智能抠图
+    			</button>
+                <p style="text-align: center;">
+                    项目采用Segment-anything框架，支持用户通过点选或框选的方式快速精准地扣取目标物体，显著提升抠图效率。<br>
+                    此外，用户还可以为抠取的目标物体自由添加或替换背景，满足个性化设计需求。<br>
+                </p>
+            </div>
+            
+            <div class="image-column">
+                <div class="image-container">
+                    <img th:src="@{/images/1.png}" alt="示例图片" width="280" height="320">
+                    <img th:src="@{/images/1.1.png}" alt="示例图片" width="280" height="320">
+                </div>
+            </div>
+        </div>
+<br>
+<br>
+<br>
+<br>
+
+        <div class="container2">
+            <div class="image-column">
+                <div class="image-container">
+                    <img th:src="@{/images/2.png}" alt="示例图片" width="800" height="260">
+                </div>
+            </div>
+            <div class="text-column">
+                <button class="btn" onclick="showPrompt()">
+                去水印与物体
+            </button>
+                <p style="text-align: center;">
+                    基于可提示分割（Promptable Segmentation）与门控卷积（gated conv），结合SAM和Deepfillv2框架实现图像修复。<br>
+                  用户在图片中打点或画矩形框，后台反馈目标物体识别效果，识别效果足够后，将目标物体删除并补全背景 <br>
+                </p>
+            </div>
+        </div>
+<br>
+<br>
+<br>
+<br>
+
+        <div class="container1">
+            <div class="text-column">
+                <button class="btn" onclick="showPrompt()">
+                    图片修复
+                </button>
+                <p style="text-align: center;">
+                    基于OpenCV框架和微软的Bringing-Old-Photos-Back-to-Life框架开发，能够智能识别并去除图片中的划痕、噪点等瑕疵，同时有效修复由于闪光灯导致的人像红眼问题。通<br>
+                  过先进的图像处理算法，该功能可以恢复图片的原始清晰度与自然度，提升视觉效果，适用于老照片修复、日常图片优化等多种场景。<br>
+                </p>
+            </div>
+            <div class="image-column">
+                <div class="image-container">
+                    <img th:src="@{/images/3.png}" alt="示例图片" width="450" height="460">
+                </div>
+            </div>
+        </div>
+<br>
+<br>
+<br>
+<br>
+
+        <div class="container2">
+            <div class="image-column">
+                <div class="image-container">
+                    <img th:src="@{/images/4.png}" alt="示例图片" width="850" height="260">
+                </div>
+            </div>
+            <div class="text-column">
+                <button class="btn" onclick="showPrompt()">
+                    图像生成
+                </button>
+                <p style="text-align: center;">
+                    项目基于生成对抗网络（GAN），采用先进的StyleGAN2框架生成高质量图像。用户<br>
+                可根据需求选择图像种类，系统将随机生成风格多样、细节丰富的图像，适用于艺术创作、设计灵感激发等场景，为用户提供无限创意可能。 </p>
+            </div>
+        </div>
+<br>
+<br>
+<br>
+<br>
+
+        <div class="container1">
+            <div class="text-column">
+                <button class="btn" onclick="showPrompt()">
+                    OCR文字识别与翻译
+                </button>
+                <p style="text-align: center;">利用开源OCR框架（PaddleOCR）对图片中的文字进行精准识别，提取出中文内容后，通过调用第三方翻译API（腾讯云API）将识别出的中文文本自动翻译成英文，实现从图像到英文文本的一站式处理，满足多语言场景需求。<br>
+                </p>
+            </div>
+            <div class="image-column">
+                <div class="image-container">
+                    <img th:src="@{/images/5.png}" alt="示例图片" width="880" height="220">
+                </div>
+            </div>
+        </div>
+<br>
+<br>
+<br>
+<br>
+
+        <div class="container3">
+          <h2 align="center" style="text-align: center;">
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+            我们的图片处理工具 <br>
+          </h2>
+            <p align="center" style="text-align: center;">ImageCraft集成了强大的在线图片编辑器，支持智能抠图、图像生成、图片修复、文字识别与翻译、裁剪，以及添加文字、转换格式等。<br>
+                ImageCraft无需下载，就可以实现在线一键抠图、改图、修图、美图。<br>
+              <br>
+              <br>
+              <br>
+              <br>
+              <br>
+              <br>
+              <br>
+              <br>
+              <br>
+              <br>
+              <br>
+              <br>
+                </p>
+                
+      </div>
+
+    </div>
+</div>
+<script>
+        function showPrompt() {
+            alert('请注册或登录后使用');
+        }
+    </script>
+<script th:src="@{/script.js}"></script>
+</body>
+</html>
