@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片去噪点测试</title>
+</head>
+<body>
+    <h1>图片去噪点测试</h1>
+
+    <form id="uploadForm">
+        <label for="file">选择图片 (JPG/PNG, 最大 5MB):</label>
+        <input type="file" id="file" name="file" accept="image/jpeg, image/png" required>
+        <br><br>
+        <button type="submit">上传图片</button>
+    </form>
+
+    <h2>上传结果</h2>
+    <div id="uploadResult">
+        <p id="uploadStatus">尚未上传图片</p>
+        <img id="uploadedImage" src="" alt="上传的图片" style="display: none; max-width: 100%; height: auto;">
+    </div>
+
+    <h2>处理结果</h2>
+    <div id="disposeResult">
+        <p id="disposeStatus">尚未处理图片</p>
+        <img id="processedImage" src="" alt="处理后的图片" style="display: none; max-width: 100%; height: auto;">
+    </div>
+
+    <h2>下载结果</h2>
+    <div id="downloadResult">
+        <p id="downloadStatus">尚未下载图片</p>
+        <a id="downloadLink" href="#" style="display: none;">点击下载处理后的图片</a>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
+
+            const uploadStatus = document.getElementById('uploadStatus');
+            const uploadedImage = document.getElementById('uploadedImage');
+            const disposeStatus = document.getElementById('disposeStatus');
+            const processedImage = document.getElementById('processedImage');
+            const downloadStatus = document.getElementById('downloadStatus');
+            const downloadLink = document.getElementById('downloadLink');
+
+            if (!file) {
+                uploadStatus.textContent = "请选择一张图片进行上传！";
+                return;
+            }
+
+            uploadStatus.textContent = "正在上传图片...";
+            uploadedImage.style.display = "none";
+            disposeStatus.textContent = "尚未处理图片";
+            processedImage.style.display = "none";
+            downloadStatus.textContent = "尚未下载图片";
+            downloadLink.style.display = "none";
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // 调用 /scratch/uploads 接口
+                const uploadResponse = await fetch('http://localhost:8080/denoising/uploads', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const uploadResult = await uploadResponse.json();
+
+                if (uploadResult.code === 1) {
+                    // 上传成功
+                    const oriImgUrl = uploadResult.oriImgUrl;
+                    uploadStatus.textContent = "上传成功！";
+                    uploadedImage.src = URL.createObjectURL(file);
+                    // uploadedImage.src = oriImgUrl;
+                    uploadedImage.style.display = "block";
+
+                    // 调用 /scratch/dispose 接口
+                    disposeStatus.textContent = "正在处理图片...";
+                    const disposeResponse = await fetch('http://localhost:8080/denoising/dispose', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ oriImgUrl }),
+                    });
+
+                    const disposeResult = await disposeResponse.json();
+
+                    if (disposeResult.code === 1) {
+                        // 处理成功
+                        const resImgUrl = disposeResult.data.resImgUrl;
+                        disposeStatus.textContent = "图片处理成功！";
+                        processedImage.src = resImgUrl + "/final_output/" + resImgUrl.split('/').pop() + ".png";
+                        processedImage.style.display = "block";
+
+                        // 调用 /scratch/download 接口
+                        downloadStatus.textContent = "正在准备下载...";
+                        const downloadResponse = await fetch('http://localhost:8080/denoising/download' , {
+                            method: 'POST',
+                            headers: {
+                            'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ resImgUrl }),
+                        });
+
+                        if (downloadResponse.ok) {
+                            downloadStatus.textContent = "图片下载准备完成！";
+                            const blob = await downloadResponse.blob();
+                            const downloadUrl = URL.createObjectURL(blob);
+                            downloadLink.href = downloadUrl;
+                            downloadLink.download = resImgUrl.split('/').pop() + ".png";
+                            downloadLink.style.display = "block";
+                            downloadLink.textContent = "点击下载处理后的图片";
+                        } else {
+                            downloadStatus.textContent = "图片下载失败！";
+                        }
+                    } else {
+                        disposeStatus.textContent = `图片处理失败: ${disposeResult.msg}`;
+                    }
+                } else {
+                    // 上传失败
+                    uploadStatus.textContent = `上传失败: ${uploadResult.msg}`;
+                }
+            } catch (error) {
+                uploadStatus.textContent = `上传失败: ${error.message}`;
+                disposeStatus.textContent = `处理失败: ${error.message}`;
+                downloadStatus.textContent = `下载失败: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
