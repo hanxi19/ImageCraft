@@ -85,6 +85,10 @@ public class HelloController {
     public String showscratchTest3Page() {
         return "scratchTest3";
     }
+    @GetMapping("denoisingTest")
+    public String showdenoisingPage() {
+        return "denoisingTest";
+    }
     // 生成验证码
     @GetMapping("/captcha")
     public void getCaptcha(HttpServletRequest request, HttpServletResponse response) {
