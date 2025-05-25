@@ -1,0 +1,8 @@
+<h2>kaptcha验证码验证</h2>
+<form action="/loginh" method="post">
+    <input type="text" name="verifyCode" placeholder="请输入验证码" required="true">
+    <img alt="单击图片刷新！" class="pointer" src="/common/kaptcha"
+         onclick="this.src='/common/kaptcha?d='+new Date()*1">
+    </br>
+    <button type="submit" value="submit">登陆</button>
+</form>
