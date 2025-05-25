@@ -4,14 +4,17 @@
     <link rel="stylesheet" th:href="@{/homee.css}" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能去红眼工具</title>
+    <title>图片裁剪 - 图艺工坊</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
     <style>
         :root {
             --primary-color: #4361ee;
+            --primary-light: #6b85f1;
             --secondary-color: #3f37c9;
             --success-color: #4cc9f0;
+            --warning-color: #ffbe0b;
             --danger-color: #ff5a5f;
             --light-color: #f8f9fa;
             --dark-color: #212529;
@@ -31,16 +34,16 @@
             box-sizing: border-box;
         }
 
-        h1 {
+        .page-title {
             color: var(--primary-color);
-            font-size: 2.2rem;
+            font-size: 2rem;
             margin-bottom: 25px;
             text-align: center;
             position: relative;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
 
-        h1::after {
+        .page-title::after {
             content: '';
             position: absolute;
             bottom: 0;
@@ -52,108 +55,179 @@
             border-radius: 2px;
         }
 
-        .container {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 30px;
-            margin-bottom: 20px;
+        .form-group {
+            margin-bottom: 25px;
         }
 
-        .upload-section {
-            margin-bottom: 30px;
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--dark-color);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .form-label:hover {
+            color: var(--primary-color);
         }
 
         .file-input-wrapper {
-            border: 2px dashed #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-button {
+            border: 2px dashed #d1d5db;
             border-radius: var(--border-radius);
-            padding: 30px;
+            padding: 25px 20px;
             text-align: center;
+            cursor: pointer;
             transition: var(--transition);
+            width: 100%;
             background-color: rgba(67, 97, 238, 0.03);
         }
 
-        .file-input-wrapper:hover {
+        .file-input-button:hover {
             border-color: var(--primary-color);
             background-color: rgba(67, 97, 238, 0.08);
         }
 
-        #canvas {
+        .file-input-button i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+        }
+
+        .file-input-button p {
+            margin: 0;
+            color: var(--gray-color);
+            font-size: 0.95rem;
+        }
+
+        #fileInput {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
             width: 100%;
-            border-radius: var(--border-radius);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            cursor: crosshair;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background-color: var(--primary-color);
-            color: white;
+            display: inline-block;
             border: none;
             border-radius: var(--border-radius);
-            padding: 14px 28px;
+            padding: 12px 24px;
             font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
             transition: var(--transition);
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
             box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
         }
 
-        .btn:hover {
+        .btn-submit:hover {
             background-color: var(--secondary-color);
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
         }
 
-        .btn:disabled {
-            background-color: #cbd5e1;
-            cursor: not-allowed;
-            opacity: 0.7;
-            transform: none;
-        }
-
-        .status-box {
-            padding: 15px;
-            border-radius: var(--border-radius);
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .status-success {
-            background-color: rgba(76, 201, 240, 0.1);
-            border-left: 4px solid var(--success-color);
-        }
-
-        .status-error {
-            background-color: rgba(255, 90, 95, 0.1);
-            border-left: 4px solid var(--danger-color);
-        }
-
-        .result-image {
-            width: 100%;
-            border-radius: var(--border-radius);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-
-        .download-btn {
+        .btn-download {
             background-color: var(--success-color);
-            margin-top: 20px;
+            color: white;
+            box-shadow: 0 4px 8px rgba(76, 201, 240, 0.2);
+            opacity: 0.6;
         }
 
-        .download-btn:hover {
+        .btn-download:not([disabled]) {
+            opacity: 1;
+        }
+
+        .btn-download:hover:not([disabled]) {
             background-color: #3aa8d8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(76, 201, 240, 0.25);
         }
 
-        .instruction {
+        .btn-download[disabled] {
+            background-color: #b0b0b0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .preview-container {
+            margin-bottom: 25px;
+        }
+
+        .image-preview-box {
+            width: 100%;
+            max-height: 70vh;
+            min-height: 300px;
+            background: var(--light-color);
+            border: 2px dashed #dee2e6;
+            border-radius: var(--border-radius);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .preview-image {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .upload-hint {
+            position: absolute;
             color: var(--gray-color);
-            font-size: 0.9rem;
-            margin: 10px 0;
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .result-preview {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: none;
+        }
+
+        .result-preview h4 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
         }
 
         @media (max-width: 768px) {
@@ -161,55 +235,58 @@
                 padding: 20px;
             }
 
-            h1 {
+            .page-title {
                 font-size: 1.8rem;
             }
+
+            .form-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .image-preview-box {
+                min-height: 250px;
+            }
         }
-        /* 修改后的按钮颜色定义 */
-        .feature-btn:nth-of-type(1) { background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%); }
-        .feature-btn:nth-of-type(2) { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
-        .feature-btn:nth-of-type(3) { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
-        .feature-btn:nth-of-type(4) { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
-        .feature-btn:nth-of-type(5) { background: linear-gradient(135deg, #ef4444 0%, #f87171 100%); }
-        .feature-btn:nth-of-type(6) { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
-        .feature-btn:nth-of-type(7) { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
-        .feature-btn:nth-of-type(8) { background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); }
-        .feature-btn:nth-of-type(9) { background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%); }
-        .feature-btn:nth-of-type(10) { background: linear-gradient(135deg, #84cc16 0%, #a3e635 100%); }
     </style>
-    
+
+
+
 </head>
 <body>
-    <nav class="fixed-nav">
-    	<div class="nav-container">
+<nav class="fixed-nav">
+    <div class="nav-container">
         <!-- 左侧标题 -->
-        	<h2>ImageCraft 图艺工坊</h2>
-        
-        	<!-- 右侧登录注册 -->
-        	<div class="auth-links">
-    			<a th:href="@{/changepassword}">修改密码</a>
-    			<a th:href="@{/login}">退出登录</a>
-			</div>
-    	</div>
-	</nav>
+        <h2>ImageCraft 图艺工坊</h2>
 
-    <!-- 左侧功能导航 -->
+        <!-- 右侧登录注册 -->
+        <div class="auth-links">
+            <a th:href="@{/changepassword}">修改密码</a>
+            <a th:href="@{/login}">退出登录</a>
+        </div>
+    </div>
+</nav>
+
+<!-- 左侧功能导航 -->
 
 <div class="features-container">
     <nav class="features-nav">
         <a href="Picture_croppingmem" class="feature-btn">
             <span class="btn-text">图片裁剪</span>
         </a>
-        <a href="Compress" class="feature-btn">
+        <a href="Compressmem" class="feature-btn">
             <span class="btn-text">图片压缩</span>
         </a>
-        <a href="Conversion" class="feature-btn">
+        <a href="Conversionmem" class="feature-btn">
             <span class="btn-text">格式转换</span>
         </a>
-        <a href="Test_Added" class="feature-btn">
+        <a href="Test_Addedmem" class="feature-btn">
             <span class="btn-text">添加文字</span>
         </a>
-        <a href="GIF" class="feature-btn">
+        <a href="GIFmem" class="feature-btn">
             <span class="btn-text">生成GIF</span>
         </a>
         <a href="scratchTest3" class="feature-btn">
@@ -227,265 +304,187 @@
         <a href="denoisingTest" class="feature-btn">
             <span class="btn-text">图片去噪点</span>
         </a>
+        <a href="OCR" class="feature-btn">
+            <span class="btn-text">文字识别</span>
+        </a>
+        <a href="SAM" class="feature-btn">
+            <span class="btn-text">图像分割</span>
+        </a>
     </nav>
 </div>
 
-    
-    <!-- 功能内容区 -->
-    <div class="main-container">
-        <h1>智能去红眼工具</h1>
+<!-- 功能内容区 -->
+<div class="main-container">
+    <h1 class="page-title">图片裁剪</h1>
 
-        <div class="container">
-            <!-- 上传区域 -->
-            <div class="upload-section">
-                <div class="file-input-wrapper">
-                    <form id="uploadForm">
-                        <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--primary-color); margin-bottom: 15px;"></i>
-                        <p style="color: var(--gray-color); margin-bottom: 20px;">拖放图片或点击上传 (JPG/PNG, 最大5MB)</p>
-                        <input type="file" id="file" name="file" accept="image/jpeg, image/png" required
-                            style="display: none;">
-                        <button type="button" class="btn" onclick="document.getElementById('file').click()">
-                            <i class="fas fa-folder-open"></i> 选择文件
-                        </button>
-                    </form>
-                </div>
-                <div id="uploadStatus" class="status-box"></div>
+    <!-- 文件选择区域 -->
+    <div class="form-group">
+        <label for="fileInput" class="form-label">选择图片：</label>
+        <div class="file-input-wrapper">
+            <div class="file-input-button">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>点击或拖放图片到此处</p>
             </div>
-
-            <!-- 处理区域 -->
-            <div class="processing-section">
-                <h3><i class="fas fa-draw-polygon"></i> 标记红眼区域</h3>
-                <p class="instruction">在图片上拖动鼠标绘制矩形框标记红眼区域</p>
-                <canvas id="canvas"></canvas>
-                <div style="margin-top: 20px;">
-                    <button id="processButton" class="btn" disabled>
-                        <i class="fas fa-magic"></i> 开始处理
-                    </button>
-                </div>
-                <div id="processStatus" class="status-box"></div>
-            </div>
-
-            <!-- 结果区域 -->
-            <div class="result-section">
-                <h3><i class="fas fa-image"></i> 处理结果</h3>
-                <div id="processedImageContainer"></div>
-                <div style="margin-top: 20px;">
-                    <button id="downloadButton" class="btn download-btn" disabled>
-                        <i class="fas fa-download"></i> 下载结果
-                    </button>
-                </div>
-                <div id="downloadStatus" class="status-box"></div>
-            </div>
+            <input
+                    type="file"
+                    id="fileInput"
+                    accept="image/*"
+                    required
+            >
         </div>
     </div>
 
-    <script>
-        // 样式相关常量
-        const STATUS_STYLE = {
-            SUCCESS: 'status-success',
-            ERROR: 'status-error'
+    <!-- 操作按钮组 -->
+    <div class="form-buttons">
+        <button class="btn btn-submit" onclick="handleCrop()">
+            <i class="fas fa-crop"></i> 执行裁剪
+        </button>
+        <button class="btn btn-download" onclick="downloadResult()" disabled id="downloadBtn">
+            <i class="fas fa-download"></i> 下载结果
+        </button>
+    </div>
+
+    <!-- 图片预览容器 -->
+    <div class="preview-container">
+        <div class="image-preview-box">
+            <img id="previewImage" class="preview-image">
+            <div class="upload-hint">请选择图片</div>
+        </div>
+    </div>
+
+    <!-- 裁剪结果预览 -->
+    <div class="result-preview" id="resultPreview">
+        <h4>裁剪结果：</h4>
+        <img id="croppedResult" class="preview-image">
+    </div>
+
+</div>
+<!-- 引入依赖 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+<script>
+    let cropper = null;
+    let croppedBlob = null;
+
+    // 初始化图片选择
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            initCropper(event.target.result);
         };
+        reader.readAsDataURL(file);
+    });
 
-        // DOM元素
-        const uploadForm = document.getElementById('uploadForm');
-        const fileInput = document.getElementById('file');
-        const uploadStatus = document.getElementById('uploadStatus');
-        const canvas = document.getElementById('canvas');
-        const processButton = document.getElementById('processButton');
-        const processStatus = document.getElementById('processStatus');
-        const downloadButton = document.getElementById('downloadButton');
-        const downloadStatus = document.getElementById('downloadStatus');
+    // 初始化裁剪器
+    function initCropper(imageSrc) {
+        const img = document.getElementById('previewImage');
+        const hint = document.querySelector('.upload-hint');
 
-        let ctx, img, oriImgUrl, resImgUrl;
-        let rectangles = [];
-        let isDrawing = false;
-        let startX, startY;
+        hint.style.display = 'none';
+        img.src = imageSrc;
 
-        // 初始化状态显示
-        function initStatus(element) {
-            element.className = 'status-box';
-            element.innerHTML = '';
+        if (cropper) {
+            cropper.destroy();
         }
 
-        // 显示状态消息
-        function showStatus(element, message, style = '') {
-            initStatus(element);
-            element.classList.add(style);
-            element.innerHTML = `
-                <i class="fas fa-spinner fa-pulse"></i>
-                <span>${message}</span>
-            `;
+        cropper = new Cropper(img, {
+            aspectRatio: NaN,
+            viewMode: 1,
+            autoCropArea: 1,
+            responsive: true,
+            checkCrossOrigin: false,
+            background: false,
+            cropBoxMovable: true,
+            cropBoxResizable: true
+        });
+    }
+
+    // 处理裁剪
+    function handleCrop() {
+        if (!cropper) {
+            alert('请先选择图片');
+            return;
         }
 
-        // 显示成功状态
-        function showSuccess(element, message) {
-            initStatus(element);
-            element.classList.add(STATUS_STYLE.SUCCESS);
-            element.innerHTML = `
-                <i class="fas fa-check-circle"></i>
-                <span>${message}</span>
-            `;
-        }
-
-        // 显示错误状态
-        function showError(element, message) {
-            initStatus(element);
-            element.classList.add(STATUS_STYLE.ERROR);
-            element.innerHTML = `
-                <i class="fas fa-exclamation-circle"></i>
-                <span>${message}</span>
-            `;
-        }
-
-        // 文件上传处理
-        uploadForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            showStatus(uploadStatus, '正在上传图片...');
-
-            const formData = new FormData();
-            formData.append('image', file);
-
-            try {
-                const response = await fetch('http://localhost:8080/redeyes/uploads', {
-                    method: 'POST',
-                    body: formData,
-                });
-                const result = await response.json();
-
-                if (result.code === 1) {
-                    oriImgUrl = result.oriImgUrl;
-                    showSuccess(uploadStatus, '图片上传成功！');
-                    loadImage(URL.createObjectURL(file));
-                } else {
-                    showError(uploadStatus, `上传失败: ${result.msg}`);
-                }
-            } catch (error) {
-                showError(uploadStatus, `上传失败: ${error.message}`);
-            }
+        // 获取裁剪数据
+        const canvas = cropper.getCroppedCanvas({
+            imageSmoothingQuality: 'high',
+            minWidth: 100,
+            minHeight: 100,
+            maxWidth: 4096,
+            maxHeight: 4096,
+            fillColor: '#fff'
         });
 
-        // 加载图片到画布
-        function loadImage(url) {
-            img = new Image();
-            img.onload = () => {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                processButton.disabled = false;
-                canvas.style.display = 'block';
-            };
-            img.onerror = () => showError(uploadStatus, '图片加载失败');
-            img.src = url;
+        if (!canvas) {
+            alert('裁剪失败，请重试');
+            return;
         }
 
-        // 画布绘制逻辑
-        function handleCanvasInteraction() {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            canvas.addEventListener('mousedown', (e) => {
-                isDrawing = true;
-                startX = (e.clientX - rect.left) * scaleX;
-                startY = (e.clientY - rect.top) * scaleY;
-            });
-
-            canvas.addEventListener('mousemove', (e) => {
-                if (!isDrawing) return;
-                const currentX = (e.clientX - rect.left) * scaleX;
-                const currentY = (e.clientY - rect.top) * scaleY;
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
-                drawRect(startX, startY, currentX - startX, currentY - startY);
-            });
-
-            canvas.addEventListener('mouseup', (e) => {
-                if (!isDrawing) return;
-                isDrawing = false;
-                const endX = (e.clientX - rect.left) * scaleX;
-                const endY = (e.clientY - rect.top) * scaleY;
-
-                const normalizedRect = [
-                    startX / canvas.width,
-                    startY / canvas.height,
-                    (endX - startX) / canvas.width,
-                    (endY - startY) / canvas.height
-                ];
-                rectangles.push(normalizedRect);
-                redrawCanvas();
-            });
-        }
-
-        function drawRect(x, y, w, h) {
-            ctx.strokeStyle = '#ff4757';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            ctx.strokeRect(x, y, w, h);
-        }
-
-        function redrawCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
-            rectangles.forEach(rect => {
-                const [x, y, w, h] = rect;
-                drawRect(x * canvas.width, y * canvas.height, w * canvas.width, h * canvas.height);
-            });
-        }
-
-        // 图片处理逻辑
-        processButton.addEventListener('click', async () => {
-            if (rectangles.length === 0) {
-                showError(processStatus, '请先标记红眼区域！');
+        // 显示结果预览
+        canvas.toBlob(blob => {
+            if (!blob) {
+                alert('生成裁剪图片失败');
                 return;
             }
 
-            showStatus(processStatus, '正在处理图片...');
+            croppedBlob = blob;
+            const url = URL.createObjectURL(blob);
+            const resultImg = document.getElementById('croppedResult');
+            resultImg.src = url;
 
-            try {
-                const response = await fetch('http://localhost:8080/redeyes/dispose', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ oriImgUrl, eyes: rectangles }),
-                });
+            const resultPreview = document.getElementById('resultPreview');
+            resultPreview.style.display = 'block';
 
-                const result = await response.json();
-                if (result.code !== 1) throw new Error(result.msg);
+            document.getElementById('downloadBtn').disabled = false;
 
-                const downloadRes = await fetch('http://localhost:8080/redeyes/download', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ resImgUrl: result.data.resImgUrl }),
-                });
+            // 滚动到结果区域
+            resultPreview.scrollIntoView({ behavior: 'smooth' });
+        }, 'image/png', 0.95);
+    }
 
-                if (!downloadRes.ok) throw new Error('图片下载失败');
-                
-                const blob = await downloadRes.blob();
-                const url = URL.createObjectURL(blob);
-                showProcessedImage(url);
-                downloadButton.disabled = false;
-                showSuccess(processStatus, '图片处理成功！');
+    // 下载结果
+    function downloadResult() {
+        if (!croppedBlob) return;
 
-            } catch (error) {
-                showError(processStatus, `处理失败: ${error.message}`);
-            }
-        });
+        const url = URL.createObjectURL(croppedBlob);
+        const a = document.createElement('a');
+        a.download = `cropped-${new Date().toISOString().slice(0, 10)}.png`;
+        a.href = url;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 
-        function showProcessedImage(url) {
-            const container = document.getElementById('processedImageContainer');
-            container.innerHTML = `
-                <img src="${url}" class="result-image" alt="处理结果">
-            `;
-            downloadButton.href = url;
-            downloadButton.download = `redeye_removal_${Date.now()}.png`;
+    // 拖放功能
+    const dropArea = document.querySelector('.file-input-button');
+
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.style.borderColor = 'var(--primary-color)';
+        dropArea.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.style.borderColor = '#d1d5db';
+        dropArea.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.style.borderColor = '#d1d5db';
+        dropArea.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
+
+        if (e.dataTransfer.files.length) {
+            document.getElementById('fileInput').files = e.dataTransfer.files;
+            const event = new Event('change');
+            document.getElementById('fileInput').dispatchEvent(event);
         }
-
-        // 初始化画布交互
-        handleCanvasInteraction();
-    </script>
+    });
+</script>
 </body>
 </html>

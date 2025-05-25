@@ -4,10 +4,10 @@
     <link rel="stylesheet" th:href="@{/homee.css}" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片转GIF工具</title>
+    <title>图片裁剪 - 图艺工坊</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
     <style>
         :root {
             --primary-color: #4361ee;
@@ -23,38 +23,27 @@
             --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-
         .main-container {
             margin-right: 20px; /* 减少右侧边距 */
             margin-left: 20px; /* 增加左侧边距 */
             max-width: calc(100%); /* 动态计算最大宽度 */
         }
-        /*.content-wrapper {*/
-        /*    display: grid;*/
-        /*    grid-template-columns: 240px 1fr; !* 左侧固定240px，右侧自适应 *!*/
-        /*    gap: 30px; !* 两列间距 *!*/
-        /*    width: 100%;*/
-        /*    max-width: 1400px;*/
-        /*    padding: 0 20px;*/
-        /*    margin: 0 auto;*/
-        /*}*/
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        h1 {
+
+        .page-title {
             color: var(--primary-color);
-            font-size: 2.2rem;
+            font-size: 2rem;
             margin-bottom: 25px;
             text-align: center;
             position: relative;
             padding-bottom: 10px;
         }
-        
-        h1::after {
+
+        .page-title::after {
             content: '';
             position: absolute;
             bottom: 0;
@@ -65,16 +54,77 @@
             background: linear-gradient(to right, var(--primary-color), var(--success-color));
             border-radius: 2px;
         }
-        
-        .upload-area {
+
+        .form-group {
             margin-bottom: 25px;
-            text-align: center;
         }
-        
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--dark-color);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .form-label:hover {
+            color: var(--primary-color);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-button {
+            border: 2px dashed #d1d5db;
+            border-radius: var(--border-radius);
+            padding: 25px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            background-color: rgba(67, 97, 238, 0.03);
+        }
+
+        .file-input-button:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.08);
+        }
+
+        .file-input-button i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+        }
+
+        .file-input-button p {
+            margin: 0;
+            color: var(--gray-color);
+            font-size: 0.95rem;
+        }
+
+        #fileInput {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
         .btn {
             display: inline-block;
-            background-color: var(--primary-color);
-            color: white;
             border: none;
             border-radius: var(--border-radius);
             padding: 12px 24px;
@@ -83,219 +133,159 @@
             cursor: pointer;
             transition: var(--transition);
             text-align: center;
-            margin: 0 10px;
+            flex: 1;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
             box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
         }
-        
-        .btn:hover {
+
+        .btn-submit:hover {
             background-color: var(--secondary-color);
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
         }
-        
-        .btn-success {
+
+        .btn-download {
             background-color: var(--success-color);
+            color: white;
             box-shadow: 0 4px 8px rgba(76, 201, 240, 0.2);
+            opacity: 0.6;
         }
-        
-        .btn-success:hover {
+
+        .btn-download:not([disabled]) {
+            opacity: 1;
+        }
+
+        .btn-download:hover:not([disabled]) {
             background-color: #3aa8d8;
+            transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(76, 201, 240, 0.25);
         }
-        
-        .btn:disabled {
+
+        .btn-download[disabled] {
             background-color: #b0b0b0;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
-        
-        .file-list {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0;
-            border: 2px dashed #d1d5db;
-            border-radius: var(--border-radius);
-            min-height: 100px;
-            background-color: rgba(67, 97, 238, 0.03);
-            transition: var(--transition);
+
+        .preview-container {
+            margin-bottom: 25px;
         }
-        
-        .file-list.empty {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--gray-color);
-            font-style: italic;
-        }
-        
-        .file-item {
-            padding: 12px 15px;
-            margin: 8px;
-            background: white;
+
+        .image-preview-box {
+            width: 100%;
+            max-height: 70vh;
+            min-height: 300px;
+            background: var(--light-color);
+            border: 2px dashed #dee2e6;
             border-radius: var(--border-radius);
-            cursor: move;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--box-shadow);
-            transition: var(--transition);
             position: relative;
-        }
-        
-        .file-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .file-item.dragging {
-            opacity: 0.5;
-            background-color: var(--light-color);
-        }
-        
-        .file-item .file-name {
-            flex: 1;
-            margin-right: 10px;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .file-item .remove-btn {
-            background-color: var(--danger-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            transition: var(--transition);
         }
-        
-        .file-item .remove-btn:hover {
-            background-color: #e63946;
-            transform: scale(1.1);
-        }
-        
-        .preview-area {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: rgba(76, 201, 240, 0.1);
-            border-radius: var(--border-radius);
-            border-left: 4px solid var(--success-color);
-            text-align: center;
-        }
-        
-        .preview-area h3 {
-            color: var(--success-color);
-            margin-bottom: 15px;
-        }
-        
-        .download-link {
-            display: inline-block;
-            background-color: var(--success-color);
-            color: white;
-            text-decoration: none;
-            border-radius: var(--border-radius);
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: var(--transition);
-            margin-bottom: 15px;
-            box-shadow: 0 4px 8px rgba(76, 201, 240, 0.2);
-        }
-        
-        .download-link:hover {
-            background-color: #3aa8d8;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(76, 201, 240, 0.25);
-        }
-        
-        .gif-preview {
+
+        .preview-image {
+            display: block;
             max-width: 100%;
-            border-radius: var(--border-radius);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            margin-top: 15px;
+            max-height: 100%;
         }
-        
-        .error {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: rgba(255, 90, 95, 0.1);
-            color: var(--danger-color);
-            border-radius: var(--border-radius);
-            border-left: 4px solid var(--danger-color);
+
+        .upload-hint {
+            position: absolute;
+            color: var(--gray-color);
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 20px;
         }
-        
-        #fileInput {
+
+        .result-preview {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
             display: none;
         }
-        
-        .file-count {
-            margin-top: 10px;
-            color: var(--gray-color);
-            font-size: 0.9rem;
-            text-align: center;
+
+        .result-preview h4 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
         }
-        
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
             }
-            
-            h1 {
+
+            .page-title {
                 font-size: 1.8rem;
             }
-            
-            .upload-area {
-                display: flex;
+
+            .form-buttons {
                 flex-direction: column;
-                gap: 10px;
             }
-            
+
             .btn {
                 width: 100%;
-                margin: 5px 0;
+            }
+
+            .image-preview-box {
+                min-height: 250px;
             }
         }
     </style>
-    
-    
 
-    
+
+
+
+
 </head>
 <body>
-<!--<div class="content-wrapper">-->
-    <nav class="fixed-nav">
-    	<div class="nav-container">
+<nav class="fixed-nav">
+    <div class="nav-container">
         <!-- 左侧标题 -->
-        	<h2>ImageCraft 图艺工坊</h2>
-        
-        	<!-- 右侧登录注册 -->
-        	<div class="auth-links">
-    			<a th:href="@{/register}">注册</a>
-    			<a th:href="@{/login}">登录</a>
-			</div>
-    	</div>
-	</nav>
+        <h2>ImageCraft 图艺工坊</h2>
 
-    <!-- 左侧功能导航 -->
+        <!-- 右侧登录注册 -->
+        <div class="auth-links">
+            <a th:href="@{/register}">注册</a>
+            <a th:href="@{/login}">登录</a>
+        </div>
+    </div>
+</nav>
+
+<!-- 左侧功能导航 -->
 
 <div class="features-container">
     <nav class="features-nav">
         <a href="Picture_cropping" class="feature-btn">
             <span class="btn-text">图片裁剪</span>
         </a>
-      <a href="Compress" class="feature-btn">
+        <a href="Compress" class="feature-btn">
             <span class="btn-text">图片压缩</span>
         </a>
         <a href="Conversion" class="feature-btn">
             <span class="btn-text">格式转换</span>
         </a>
-      <a href="Test_Added" class="feature-btn">
+        <a href="Test_Added" class="feature-btn">
             <span class="btn-text">添加文字</span>
         </a>
         <a href="GIF" class="feature-btn">
@@ -303,208 +293,179 @@
         </a>
     </nav>
 </div>
-    
-    <!-- 功能内容区 -->
-    <div class="main-container">
-        <h1>图片转GIF工具</h1>
-        
-        <div class="upload-area">
-            <button class="btn" onclick="document.getElementById('fileInput').click()">
-                <i class="fas fa-folder-open"></i> 选择图片
-            </button>
-            <button class="btn btn-success" onclick="uploadFiles()" id="generateBtn" disabled>
-                <i class="fas fa-magic"></i> 生成GIF
-            </button>
-            <input type="file" id="fileInput" multiple accept="image/*">
-            <div class="file-count" id="fileCount">已选择 0 张图片</div>
-        </div>
 
-        <ul class="file-list empty" id="fileList">
-            <li>请添加图片文件</li>
-        </ul>
+<!-- 功能内容区 -->
+<div class="main-container">
+    <h1 class="page-title">图片裁剪</h1>
 
-        <div id="result" class="preview-area" style="display: none;">
-            <h3><i class="fas fa-check-circle"></i> 转换成功！</h3>
-            <a href="#" class="download-link" id="downloadLink">
-                <i class="fas fa-download"></i> 下载GIF
-            </a>
-            <img src="" class="gif-preview" id="gifPreview">
+    <!-- 文件选择区域 -->
+    <div class="form-group">
+        <label for="fileInput" class="form-label">选择图片：</label>
+        <div class="file-input-wrapper">
+            <div class="file-input-button">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>点击或拖放图片到此处</p>
+            </div>
+            <input
+                    type="file"
+                    id="fileInput"
+                    accept="image/*"
+                    required
+            >
         </div>
     </div>
-<!--</div>-->
-    <script>
-        let selectedFiles = [];
-        let draggingIndex = null;
 
-        // 处理文件选择
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            selectedFiles = Array.from(e.target.files);
-            updateFileList();
-            updateGenerateButton();
+    <!-- 操作按钮组 -->
+    <div class="form-buttons">
+        <button class="btn btn-submit" onclick="handleCrop()">
+            <i class="fas fa-crop"></i> 执行裁剪
+        </button>
+        <button class="btn btn-download" onclick="downloadResult()" disabled id="downloadBtn">
+            <i class="fas fa-download"></i> 下载结果
+        </button>
+    </div>
+
+    <!-- 图片预览容器 -->
+    <div class="preview-container">
+        <div class="image-preview-box">
+            <img id="previewImage" class="preview-image">
+            <div class="upload-hint">请选择图片</div>
+        </div>
+    </div>
+
+    <!-- 裁剪结果预览 -->
+    <div class="result-preview" id="resultPreview">
+        <h4>裁剪结果：</h4>
+        <img id="croppedResult" class="preview-image">
+    </div>
+
+</div>
+<!-- 引入依赖 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+<script>
+    let cropper = null;
+    let croppedBlob = null;
+
+    // 初始化图片选择
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            initCropper(event.target.result);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // 初始化裁剪器
+    function initCropper(imageSrc) {
+        const img = document.getElementById('previewImage');
+        const hint = document.querySelector('.upload-hint');
+
+        hint.style.display = 'none';
+        img.src = imageSrc;
+
+        if (cropper) {
+            cropper.destroy();
+        }
+
+        cropper = new Cropper(img, {
+            aspectRatio: NaN,
+            viewMode: 1,
+            autoCropArea: 1,
+            responsive: true,
+            checkCrossOrigin: false,
+            background: false,
+            cropBoxMovable: true,
+            cropBoxResizable: true
+        });
+    }
+
+    // 处理裁剪
+    function handleCrop() {
+        if (!cropper) {
+            alert('请先选择图片');
+            return;
+        }
+
+        // 获取裁剪数据
+        const canvas = cropper.getCroppedCanvas({
+            imageSmoothingQuality: 'high',
+            minWidth: 100,
+            minHeight: 100,
+            maxWidth: 4096,
+            maxHeight: 4096,
+            fillColor: '#fff'
         });
 
-        // 更新文件列表显示
-        function updateFileList() {
-    const list = document.getElementById('fileList');
-    const fileCount = document.getElementById('fileCount');
-    
-    list.innerHTML = ''; // 先清空列表
-    
-    if (selectedFiles.length === 0) {
-        list.innerHTML = '<li>请添加图片文件</li>';
-        list.className = 'file-list empty';
-        fileCount.textContent = '已选择 0 张图片';
-        return;
-    }
-    
-    if (selectedFiles.length < 2) {
-        const warningLi = document.createElement('li');
-        warningLi.className = 'warning';
-        warningLi.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 至少需要选择2张图片才能生成GIF（当前已选择${selectedFiles.length}张）`;
-        list.appendChild(warningLi);
-        list.className = 'file-list warning';
-    } else {
-        list.className = 'file-list';
-    }
-    
-    // 添加文件列表项
-    selectedFiles.forEach((file, index) => {
-        const li = document.createElement('li');
-        li.className = 'file-item';
-        li.draggable = true;
-        li.dataset.index = index;
-        li.innerHTML = `
-            <span class="file-name">${file.name}</span>
-            <button class="remove-btn" onclick="removeFile(${index})">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-
-                // 拖拽排序处理
-                li.addEventListener('dragstart', e => {
-                    draggingIndex = index;
-                    li.classList.add('dragging');
-                    e.dataTransfer.setData('text/plain', index);
-                    e.dataTransfer.effectAllowed = 'move';
-                });
-
-                li.addEventListener('dragend', () => {
-                    li.classList.remove('dragging');
-                    draggingIndex = null;
-                });
-
-                li.addEventListener('dragover', e => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                    if (draggingIndex !== index) {
-                        li.style.borderTop = '2px solid var(--primary-color)';
-                    }
-                });
-
-                li.addEventListener('dragleave', () => {
-                    li.style.borderTop = '';
-                });
-
-                li.addEventListener('drop', e => {
-                    e.preventDefault();
-                    li.style.borderTop = '';
-                    if (draggingIndex !== null && draggingIndex !== index) {
-                        moveFile(draggingIndex, index);
-                    }
-                });
-
-                list.appendChild(li);
-            });
-            
-            fileCount.textContent = `已选择 ${selectedFiles.length} 张图片`;
+        if (!canvas) {
+            alert('裁剪失败，请重试');
+            return;
         }
 
-        // 更新生成按钮状态
-        function updateGenerateButton() {
-            document.getElementById('generateBtn').disabled = selectedFiles.length < 2;
-        }
-
-        // 移除文件
-        function removeFile(index) {
-            selectedFiles.splice(index, 1);
-            updateFileList();
-            updateGenerateButton();
-        } 
-		
-
-        // 移动文件位置
-        function moveFile(fromIndex, toIndex) {
-            const fileToMove = selectedFiles[fromIndex];
-            selectedFiles.splice(fromIndex, 1);
-            selectedFiles.splice(toIndex, 0, fileToMove);
-            updateFileList();
-        }
-
-        // 上传文件生成GIF
-        async function uploadFiles() {
-            if (selectedFiles.length < 2) {
-                alert('请至少选择2张图片');
+        // 显示结果预览
+        canvas.toBlob(blob => {
+            if (!blob) {
+                alert('生成裁剪图片失败');
                 return;
             }
 
-            const generateBtn = document.getElementById('generateBtn');
-            generateBtn.disabled = true;
-            generateBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 正在生成...';
+            croppedBlob = blob;
+            const url = URL.createObjectURL(blob);
+            const resultImg = document.getElementById('croppedResult');
+            resultImg.src = url;
 
-            const formData = new FormData();
-            selectedFiles.forEach(file => formData.append('files', file));
+            const resultPreview = document.getElementById('resultPreview');
+            resultPreview.style.display = 'block';
 
-            try {
-                const response = await fetch('/api/convert', {
-                    method: 'POST',
-                    body: formData
-                });
+            document.getElementById('downloadBtn').disabled = false;
 
-                const resultDiv = document.getElementById('result');
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = URL.createObjectURL(blob);
-                    
-                    const downloadLink = document.getElementById('downloadLink');
-                    downloadLink.href = url;
-                    downloadLink.download = `animation_${new Date().toISOString().slice(0, 10)}.gif`;
-                    
-                    document.getElementById('gifPreview').src = url;
-                    resultDiv.style.display = 'block';
-                    
-                    // 滚动到结果区域
-                    resultDiv.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    const error = await response.text();
-                    resultDiv.innerHTML = `
-                        <div class="error">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <span>错误：${error}</span>
-                        </div>
-                    `;
-                    resultDiv.style.display = 'block';
-                }
-            } catch (error) {
-                alert('请求失败: ' + error.message);
-            } finally {
-                generateBtn.disabled = false;
-                generateBtn.innerHTML = '<i class="fas fa-magic"></i> 生成GIF';
-            }
+            // 滚动到结果区域
+            resultPreview.scrollIntoView({ behavior: 'smooth' });
+        }, 'image/png', 0.95);
+    }
+
+    // 下载结果
+    function downloadResult() {
+        if (!croppedBlob) return;
+
+        const url = URL.createObjectURL(croppedBlob);
+        const a = document.createElement('a');
+        a.download = `cropped-${new Date().toISOString().slice(0, 10)}.png`;
+        a.href = url;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // 拖放功能
+    const dropArea = document.querySelector('.file-input-button');
+
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.style.borderColor = 'var(--primary-color)';
+        dropArea.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.style.borderColor = '#d1d5db';
+        dropArea.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.style.borderColor = '#d1d5db';
+        dropArea.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
+
+        if (e.dataTransfer.files.length) {
+            document.getElementById('fileInput').files = e.dataTransfer.files;
+            const event = new Event('change');
+            document.getElementById('fileInput').dispatchEvent(event);
         }
-
-        // 拖放文件到页面
-        document.addEventListener('dragover', e => {
-            e.preventDefault();
-        });
-
-        document.addEventListener('drop', e => {
-            e.preventDefault();
-            if (e.dataTransfer.files.length) {
-                document.getElementById('fileInput').files = e.dataTransfer.files;
-                const event = new Event('change');
-                document.getElementById('fileInput').dispatchEvent(event);
-            }
-        });
-    </script>
+    });
+</script>
 </body>
 </html>
