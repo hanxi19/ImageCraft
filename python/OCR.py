@@ -13,36 +13,52 @@ def extract_text_from_image(image_path, lang='ch'):
         Recognized text in original line format
     """
     # Initialize PaddleOCR
-    ocr = PaddleOCR(use_angle_cls=True, lang=lang)
+    ocr = PaddleOCR(use_doc_orientation_classify=False,
+    use_doc_unwarping=False,
+    use_textline_orientation=True, lang=lang)
 
     # Perform OCR recognition
-    result = ocr.ocr(image_path, cls=True)
+    result = ocr.ocr(image_path)
 
     # Organize recognition results by line
     lines = []
-    if result and len(result) > 0:
-        # Sort by y-coordinate to maintain line order
-        sorted_lines = sorted(result[0], key=lambda line: line[0][0][1])
 
-        current_line_y = None
-        current_line_text = []
+    # if result and len(result) > 0:
+    #     # Sort by y-coordinate to maintain line order
+    #     print(result[0])
+    #     sorted_lines = sorted(result[0], key=lambda line: line[0][0][1])
 
-        for line in sorted_lines:
-            _, (text, _) = line
-            y_pos = line[0][0][1]
+    #     current_line_y = None
+    #     current_line_text = []
 
-            # If y-coordinate changes beyond a certain threshold, consider it a new line
-            if current_line_y is None or abs(y_pos - current_line_y) > 20:
-                if current_line_text:
-                    lines.append(' '.join(current_line_text))
-                    current_line_text = []
-                current_line_y = y_pos
-            current_line_text.append(text)
+    #     for line in sorted_lines:
+    #         _, (text, _) = line
+    #         y_pos = line[0][0][1]
 
-        if current_line_text:
-            lines.append(' '.join(current_line_text))
+    #         # If y-coordinate changes beyond a certain threshold, consider it a new line
+    #         if current_line_y is None or abs(y_pos - current_line_y) > 20:
+    #             if current_line_text:
+    #                 lines.append(' '.join(current_line_text))
+    #                 current_line_text = []
+    #             current_line_y = y_pos
+    #         current_line_text.append(text)
 
-    return '\n'.join(lines)
+    #     if current_line_text:
+    #         lines.append(' '.join(current_line_text))
+
+    # return '\n'.join(lines)
+    if result and len(result) > 0 and isinstance(result[0], dict):
+        rec_texts = result[0].get('rec_texts', [])
+        rec_boxes = result[0].get('rec_boxes', [])
+        # 按y坐标排序
+        sorted_items = sorted(
+            list(zip(rec_boxes, rec_texts)),
+            key=lambda item: item[0][1] if len(item[0]) > 0 else 0
+        )
+        lines = [text for box, text in sorted_items]
+        return '\n'.join(lines)
+    else:
+        return ""
 
 
 def ensure_directory_exists(directory):
@@ -85,4 +101,11 @@ def main():
 
 
 if __name__ == '__main__':
+    import sys
+    sys.argv = [
+        'Ocr.py',
+        '--image', r'E:\develop\web\ImageCraft\image\ocr\ori_img\00000007.jpg',
+        '--lang', 'ch',
+        '--output_path', r'E:\develop\web\ImageCraft\image\ocr\res_Txt'
+    ]
     main()
