@@ -32,7 +32,7 @@ public class Translateservice1 implements TranslateService {
             @Value("${file.upload-dir.ocr.transTxt}") String transTxtDir,
             @Value("${tencent.cloud.secretId}") String secretId,
             @Value("${tencent.cloud.secretKey}") String secretKey,
-            @Qualifier("segment_ocr_translate_conda") Path condaPath) {
+            @Value("${file.segment_ocr_translate.conda}") Path condaPath) {
         this.runScriptPath = Paths.get(runScriptPath).toAbsolutePath().normalize();
         this.transTxtDir = Paths.get(transTxtDir).toAbsolutePath().normalize();
         this.secretId = secretId;

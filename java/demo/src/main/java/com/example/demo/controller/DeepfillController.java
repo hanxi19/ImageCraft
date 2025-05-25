@@ -193,7 +193,7 @@ public class DeepfillController {
                 response.put("code", 1);
                 response.put("msg", "获取成功");
                 Map<String, String> data = new HashMap<>();
-                data.put("resImgUrl", deepfillBean.getFillImgUrl());
+                data.put("resImgUrl", "seg_img/"+fileName);
                 response.put("data", data);
                 return ResponseEntity.ok(response);
             } else {

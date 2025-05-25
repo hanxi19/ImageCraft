@@ -27,7 +27,7 @@ public class Ocrservice1 implements OcrService {
     public Ocrservice1(
             @Value("${file.OCR.del}") String runScriptPath,
             @Value("${file.upload-dir.ocr.resTxt}") String resTxtDir,
-            @Qualifier("segment_ocr_translate_conda") Path condaPath) {
+            @Value("${file.segment_ocr_translate.conda}") Path condaPath) {
         this.runScriptPath = Paths.get(runScriptPath).toAbsolutePath().normalize();
         this.resTxtDir = Paths.get(resTxtDir).toAbsolutePath().normalize();
         this.condaPath = condaPath;

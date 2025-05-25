@@ -89,6 +89,18 @@ public class HelloController {
     public String showdenoisingPage() {
         return "denoisingTest";
     }
+    @GetMapping("SAM")
+    public String showSAMPage() {
+        return "SAM";
+    }
+    @GetMapping("OCR")
+    public String showOCRPage() {
+        return "OCR";
+    }
+    @GetMapping("deepfill")
+    public String showdeepfillPage() {
+        return "deepfill";
+    }
     // 生成验证码
     @GetMapping("/captcha")
     public void getCaptcha(HttpServletRequest request, HttpServletResponse response) {
