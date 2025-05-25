@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/homee.css}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片修复工具</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #6b85f1;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --warning-color: #ffbe0b;
+            --danger-color: #ff5a5f;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .main-container {
+            margin-right: 20px; /* 减少右侧边距 */
+            margin-left: 20px; /* 增加左侧边距 */
+            max-width: calc(100%); /* 动态计算最大宽度 */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--success-color));
+            border-radius: 2px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: var(--transition);
+        }
+
+        .canvas-container {
+            position: relative;
+            width: fit-content;
+            margin: 20px auto;
+        }
+
+        #preview, #canvas {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .btn-secondary {
+            background-color: var(--success-color);
+            box-shadow: 0 4px 8px rgba(76, 201, 240, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background-color: #3aa8d8;
+        }
+
+        .status {
+            padding: 14px;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+        }
+
+        .status i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        .status-info {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .upload-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-box {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        #downloadSection {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+
+</head>
+<body>
+<nav class="fixed-nav">
+    <div class="nav-container">
+        <!-- 左侧标题 -->
+        <h2>ImageCraft 图艺工坊</h2>
+
+        <!-- 右侧登录注册 -->
+        <div class="auth-links">
+            <a th:href="@{/changepassword}">修改密码</a>
+            <a th:href="@{/login}">退出登录</a>
+        </div>
+    </div>
+</nav>
+
+<!-- 左侧功能导航 -->
+
+<div class="features-container">
+    <nav class="features-nav">
+        <a href="Picture_croppingmem" class="feature-btn">
+            <span class="btn-text">图片裁剪</span>
+        </a>
+        <a href="Compress" class="feature-btn">
+            <span class="btn-text">图片压缩</span>
+        </a>
+        <a href="Conversion" class="feature-btn">
+            <span class="btn-text">格式转换</span>
+        </a>
+        <a href="Test_Added" class="feature-btn">
+            <span class="btn-text">添加文字</span>
+        </a>
+        <a href="GIF" class="feature-btn">
+            <span class="btn-text">生成GIF</span>
+        </a>
+        <a href="scratchTest3" class="feature-btn">
+            <span class="btn-text">图片去划痕</span>
+        </a>
+        <a href="redeyesTest1" class="feature-btn">
+            <span class="btn-text">图片去红眼</span>
+        </a>
+        <a href="deepfill" class="feature-btn">
+            <span class="btn-text">水印与物体去除</span>
+        </a>
+        <a href="stylegabtest2" class="feature-btn">
+            <span class="btn-text">图片生成</span>
+        </a>
+        <a href="denoisingTest" class="feature-btn">
+            <span class="btn-text">图片去噪点</span>
+        </a>
+        <a href="OCR" class="feature-btn">
+            <span class="btn-text">文字识别</span>
+        </a>
+        <a href="SAM" class="feature-btn">
+            <span class="btn-text">图像分割</span>
+        </a>
+    </nav>
+</div>
+
+
+<!-- 功能内容区 -->
+<div class="main-container">
+    <header>
+        <h1>图片修复工具</h1>
+    </header>
+
+    <div class="card">
+        <div class="form-group">
+            <label for="imageInput">选择图片 (JPG/PNG, 最大5MB):</label>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            <button class="btn" id="selectImageBtn">
+                <i class="fas fa-image"></i> 选择图片
+            </button>
+        </div>
+        <div class="canvas-container">
+            <img id="preview" alt="图片预览">
+            <canvas id="canvas"></canvas>
+        </div>
+        <div class="btn-group">
+            <button class="btn" id="uploadMaskButton" style="display: none;">
+                <i class="fas fa-upload"></i> 上传掩码
+            </button>
+            <button class="btn btn-secondary" id="resetBtn" style="display: none;">
+                <i class="fas fa-redo"></i> 重新绘制
+            </button>
+        </div>
+        <div class="status status-info" id="statusMessage">
+            <i class="fas fa-info-circle"></i>
+            <span>请先选择要修复的图片</span>
+        </div>
+    </div>
+
+    <div id="downloadSection" class="card">
+        <h2>修复结果</h2>
+        <img id="resultImage" alt="修复结果" style="max-width: 100%; height: auto;">
+        <a class="btn btn-secondary" id="downloadBtn" style="margin-top: 15px;">
+            <i class="fas fa-download"></i> 下载图片
+        </a>
+    </div>
+</div>
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const selectImageBtn = document.getElementById('selectImageBtn');
+    const preview = document.getElementById('preview');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const uploadMaskButton = document.getElementById('uploadMaskButton');
+    const resetBtn = document.getElementById('resetBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const downloadSection = document.getElementById('downloadSection');
+    const resultImage = document.getElementById('resultImage');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    let originalImageSize = { width: 0, height: 0 };
+    let isDrawing = false;
+
+    // 图片选择处理
+    selectImageBtn.addEventListener('click', () => imageInput.click());
+
+    imageInput.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // 上传图片
+        statusMessage.innerHTML = `
+                <div class="upload-progress">
+                    <div class="spinner"></div>
+                    <span>图片上传中...</span>
+                </div>
+            `;
+
+        try {
+            // 上传到后端
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await fetch('http://localhost:8080/deepfill/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+            if (result.code !== 1) throw new Error(result.msg);
+
+            // 显示预览
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.onload = () => {
+                    originalImageSize = {
+                        width: preview.naturalWidth,
+                        height: preview.naturalHeight
+                    };
+
+                    // 设置画布尺寸
+                    canvas.width = originalImageSize.width;
+                    canvas.height = originalImageSize.height;
+                    canvas.style.width = preview.style.width;
+                    canvas.style.height = preview.style.height;
+
+                    uploadMaskButton.style.display = 'block';
+                    resetBtn.style.display = 'block';
+                    statusMessage.innerHTML = `
+                            <div class="success-box">
+                                <span>图片已加载，请涂抹需要修复的区域</span>
+                            </div>
+                        `;
+                };
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            statusMessage.innerHTML = `
+                    <div style="color: var(--danger-color);">
+                        <i class="fas fa-exclamation-circle"></i>
+                        上传失败: ${error.message}
+                    </div>
+                `;
+        }
+    });
+
+    // 画布绘制功能
+    let lastX = 0;
+    let lastY = 0;
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    function startDrawing(e) {
+        isDrawing = true;
+        [lastX, lastY] = getCanvasCoordinates(e);
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 20;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        const [x, y] = getCanvasCoordinates(e);
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        [lastX, lastY] = [x, y];
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    function getCanvasCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return [
+            (e.clientX - rect.left) * scaleX,
+            (e.clientY - rect.top) * scaleY
+        ];
+    }
+
+    // 重置画布
+    resetBtn.addEventListener('click', () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    // 修改后的上传掩码事件处理
+    uploadMaskButton.addEventListener('click', async () => {
+        try {
+            canvas.toBlob(async (maskBlob) => { // 修改参数名称避免冲突
+                const formData = new FormData();
+                formData.append('image', maskBlob, 'mask.png');
+
+                const response = await fetch('http://localhost:8080/deepfill/seg', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+                if (result.code !== 1) throw new Error(result.msg);
+
+                // 获取修复结果
+                const fillResponse = await fetch('http://localhost:8080/deepfill/fill', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ segImgUrl: result.segImgUrl }),
+                });
+
+                const fillResult = await fillResponse.json();
+                if (fillResult.code !== 1) throw new Error(fillResult.msg);
+
+                // 显示结果（修改变量名称避免冲突）
+                const downloadApi = `http://localhost:8080/deepfill/download?resImgUrl=${encodeURIComponent(fillResult.data.resImgUrl)}`;
+                const downloadResponse = await fetch(downloadApi);
+                const imageBlob = await downloadResponse.blob(); // 修改变量名
+                const url = URL.createObjectURL(imageBlob);
+
+                resultImage.src = url;
+                downloadSection.style.display = 'block';
+                downloadBtn.href = url;
+                downloadBtn.download = `repaired_${Date.now()}.png`;
+
+                statusMessage.innerHTML = `
+                    <div class="success-box">
+                        <i class="fas fa-check-circle"></i>
+                        图片修复成功！
+                    </div>
+                `;
+            }, 'image/png');
+        } catch (error) {
+            // 修正CSS变量引用方式
+            statusMessage.innerHTML = `
+                <div style="color: var(--danger-color);">
+                    <i class="fas fa-exclamation-circle"></i>
+                    修复失败: ${error.message}
+                </div>
+            `;
+        }
+    });
+</script>
+
+</body>
+</html>

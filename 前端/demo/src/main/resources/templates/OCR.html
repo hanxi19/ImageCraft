@@ -471,7 +471,7 @@
     formData.append('image', file);
 
     try {
-      const response = await fetch('/ocr/upload', {
+      const response = await fetch('http://localhost:8080/ocr/upload', {
         method: 'POST',
         body: formData
       });
@@ -516,7 +516,7 @@
       showStatus(recognizeStatus, '识别中...');
 
       // 调用识别接口
-      const recognizeResponse = await fetch('/ocr/recognize', {
+      const recognizeResponse = await fetch('http://localhost:8080/ocr/recognize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -534,7 +534,7 @@
         currentOcrResultPath = recognizeResult.data.ocr_result_txt;
 
         // 获取识别结果内容
-        const contentResponse = await fetch(`/ocr/result/content?resultFilePath=${encodeURIComponent(currentOcrResultPath)}`);
+        const contentResponse = await fetch(`http://localhost:8080/ocr/result/content?resultFilePath=${encodeURIComponent(currentOcrResultPath)}`);
         const contentResult = await contentResponse.json();
 
         if (contentResult.code === 1) {
@@ -566,7 +566,7 @@
     const editedText = ocrTextArea.value;
 
     try {
-      const response = await fetch('/ocr/translate', {
+      const response = await fetch('http://localhost:8080/ocr/translate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -580,7 +580,7 @@
 
       const result = await response.json();
 
-      if (result.code === 1) {
+      if (result.code === 0) {
         showStatus(document.getElementById('recognizeStatus'), '修改已保存', 'success');
       } else {
         throw new Error(result.msg || '保存失败');
@@ -607,7 +607,7 @@
       showStatus(recognizeStatus, '翻译中...');
 
       // 1. 先保存编辑
-      const saveResponse = await fetch('/ocr/translate', {
+      const saveResponse = await fetch('http://localhost:8080/ocr/translate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -629,15 +629,21 @@
       if (saveResult.data && saveResult.data.translateResultPath) {
         currentTranslateResultPath = saveResult.data.translateResultPath;
 
-        const contentResponse = await fetch(`/ocr/translate/content?resultFilePath=${encodeURIComponent(currentTranslateResultPath)}`);
+        const contentResponse = await fetch(`http://localhost:8080/ocr/translate/content?resultFilePath=${encodeURIComponent(currentTranslateResultPath)}`);
         const contentResult = await contentResponse.json();
 
         if (contentResult.code === 1) {
           translationResult.textContent = contentResult.data;
+          console.log(contentResult);
           showStatus(recognizeStatus, '翻译成功', 'success');
 
           // 切换到翻译结果标签页
-          document.querySelector('.tab[data-tab="translation"]').click();
+          const translationTab = document.querySelector('.tab[data-tab="translation"]');
+          if (translationTab) {
+          translationTab.click();
+          } else {
+          console.error('翻译结果标签页不存在');
+          }
         } else {
           throw new Error(contentResult.msg || '获取翻译结果失败');
         }
@@ -657,6 +663,18 @@
       element.classList.add(type);
     }
   }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      // 移除所有tab和内容的active
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      // 当前tab和对应内容加active
+      this.classList.add('active');
+      const tabName = this.getAttribute('data-tab');
+      document.getElementById(tabName + 'Tab').classList.add('active');
+    });
+  });
 </script>
 </body>
 </html>
