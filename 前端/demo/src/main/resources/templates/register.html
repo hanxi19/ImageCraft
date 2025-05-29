@@ -54,6 +54,10 @@
             .toast-leave {
                 animation: toastOut 0.3s ease-in forwards;
             }
+            .bg-white rounded-2xl p-8 card-shadow {
+                justify-content: center;
+                align-items: center;
+            }
             @keyframes toastIn {
                 from { opacity: 0; transform: translateY(-20px); }
                 to { opacity: 1; transform: translateY(0); }
@@ -136,7 +140,7 @@
 
         <!-- 返回链接 -->
         <div class="mt-6 text-center">
-            <a th:href="@{/index}" class="text-neutral-500 hover:text-primary transition-colors duration-300 flex items-center justify-center">
+            <a th:href="@{/Tourist_Homepage}" class="text-neutral-500 hover:text-primary transition-colors duration-300 flex items-center justify-center">
                 <i class="fa-solid fa-arrow-left mr-2"></i>
                 <span>返回主页</span>
             </a>
@@ -145,7 +149,7 @@
 
     <!-- 页脚信息 -->
     <div class="mt-6 text-center text-neutral-400 text-sm">
-        <p>已有账号? <a th:href="@{/logintest}" class="text-primary hover:underline">立即登录</a></p>
+        <p>已有账号? <a th:href="@{/login}" class="text-primary hover:underline">立即登录</a></p>
         <p class="mt-3">© Image-Craft 版权所有</p>
     </div>
 </div>

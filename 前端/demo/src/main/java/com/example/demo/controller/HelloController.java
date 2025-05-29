@@ -101,6 +101,11 @@ public class HelloController {
     public String showdeepfillPage() {
         return "deepfill";
     }
+    @GetMapping("/register")
+    public String showregisterPage() {return "register";}
+    @GetMapping("/forget_pwd")
+    public String showforgetpwdPage() {return "forget_pwd";}
+
     // 生成验证码
     @GetMapping("/captcha")
     public void getCaptcha(HttpServletRequest request, HttpServletResponse response) {

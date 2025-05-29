@@ -4,8 +4,7 @@ import com.example.demo.pojo.User;
 
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 
 import com.example.demo.service.UserService;
 
@@ -19,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
+
+import java.net.URI;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -132,59 +133,71 @@ public class UserController {
         return "register.html";
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> processRegister(@RequestParam("email") String email,
-                                  @RequestParam("username") String username,
-                                  @RequestParam("password") String password,
-                                  @RequestParam("password2") String password2,
-                                  Model model) {
-        //User newUser = new User(email,username, password);
-        //userRepository.save(newUser);
+//    @PostMapping("/register")
+//    public ResponseEntity<Map<String, Object>> processRegister(@RequestParam("email") String email,
+//                                  @RequestParam("username") String username,
+//                                  @RequestParam("password") String password,
+//                                  @RequestParam("password2") String password2,
+//                                  Model model) {
+//        //User newUser = new User(email,username, password);
+//        //userRepository.save(newUser);
+//
+//        Map<String, Object> response = new HashMap<>();
+//
+//
+//        if (!password.equals(password2)) {
+//            response.put("code", 0);
+//            response.put("msg", "注册失败：两次输入的密码不一致");
+//            response.put("data", null);
+//            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+//        }
+//
+//        try {
+//
+//            User newUser = new User(email, username, password);
+//            userRepository.save(newUser);
+//            System.out.println("邮箱：" + email);
+//            System.out.println("输入的用户名: " + username);
+//            System.out.println("输入的密码: " + password);
+//            model.addAttribute("message", "注册成功");
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setLocation(new URI("/logintest"));
+//            response.put("code", 1);
+//            response.put("msg", "注册成功");
+//            response.put("data", null);
+//            return new ResponseEntity<>(response,headers,HttpStatus.OK);
+//        } catch (Exception e) {
+//            response.put("code", 0);
+//            response.put("msg", "注册失败：" + e.getMessage());
+//            response.put("data", null);
+//            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//
+//
+//    }
+@PostMapping("/register")
+public String registerUser(@RequestParam String email,
+                           @RequestParam String username,
+                           @RequestParam String password,
+                           Model model) {
+    try {
+        User newUser = new User(email, username, password);
+        userRepository.save(newUser);
+        System.out.println("邮箱：" + email);
+        System.out.println("输入的用户名: " + username);
+        System.out.println("输入的密码: " + password);
 
-        Map<String, Object> response = new HashMap<>();
-
-
-        if (!password.equals(password2)) {
-            response.put("code", 0);
-            response.put("msg", "注册失败：两次输入的密码不一致");
-            response.put("data", null);
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
-
-        try {
-
-            User newUser = new User(email, username, password);
-            userRepository.save(newUser);
-            System.out.println("邮箱：" + email);
-            System.out.println("输入的用户名: " + username);
-            System.out.println("输入的密码: " + password);
-            model.addAttribute("message", "注册成功");
-            response.put("code", 1);
-            response.put("msg", "注册成功");
-            response.put("data", null);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            response.put("code", 0);
-            response.put("msg", "注册失败：" + e.getMessage());
-            response.put("data", null);
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-
+        // 注册成功后重定向到登录页面
+        return "redirect:/logintest";
+    } catch (Exception e) {
+        model.addAttribute("error", "注册失败：" + e.getMessage());
+        return "register"; // 返回注册页面并显示错误信息
     }
+}
 
 
 
-    @GetMapping("/edit")
-    public String showEditPage() {
-        return "edit.html";
-    }
-    @GetMapping("/changepassword")
-    public String showChangePasswordPage() {
-        return "changepassword.html";
-    }
-
-    @GetMapping("/newtest")
+    @GetMapping("/forget_pwd")
     public String showForgetPasswordPage() {
         return "forget_pwd";
     }
