@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>管理员面板</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<nav class="fixed-nav">
+  <!-- 导航栏内容 -->
+</nav>
+
+<div class="container">
+  <h1 align="center">管理员面板</h1>
+
+  <h2 align="center">用户列表</h2>
+  <div align="center">
+    <form class="search-form">
+      <select id="searchType">
+        <option value="username">用户名</option>
+        <option value="email">邮箱</option>
+        <option value="id">用户ID</option>
+      </select>
+      <input type="text" id="searchKeyword" placeholder="输入搜索关键词">
+      <button type="button" onclick="searchUsers()">搜索</button>
+      <button type="button" onclick="resetSearch()">重置</button>
+    </form>
+  </div>
+
+  <div align="center">
+    <br>
+    <table>
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>用户名</th>
+        <th>邮箱</th>
+        <th>密码</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody id="userTableBody">
+      <!-- 动态加载用户数据 -->
+      </tbody>
+    </table>
+    <br>
+    <a th:href="@{/index}"><br><br>返回主页</a>
+  </div>
+</div>
+
+<script>
+  // 初始化加载用户列表
+  document.addEventListener('DOMContentLoaded', function() {
+    fetchUsers('/api/users');
+  });
+
+  // 获取用户数据
+  async function fetchUsers(url = '/api/users') {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('获取用户数据失败');
+      const users = await response.json();
+      renderUserTable(users);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('获取用户数据失败');
+    }
+  }
+
+  // 渲染用户表格
+  function renderUserTable(users) {
+    const tbody = document.getElementById('userTableBody');
+    tbody.innerHTML = '';
+    users.forEach(user => {
+      const row = `
+                    <tr>
+                        <td>${user.userId}</td>
+                        <td>${user.userName}</td>
+                        <td>${user.email}</td>
+                        <td>${user.password}</td>
+                        <td>
+                            <button onclick="deleteUser(${user.userId})">删除</button>
+                        </td>
+                    </tr>`;
+      tbody.insertAdjacentHTML('beforeend', row);
+    });
+  }
+
+  // 搜索用户
+  function searchUsers() {
+    const searchType = document.getElementById('searchType').value;
+    const keyword = document.getElementById('searchKeyword').value;
+    const url = `/api/users/search?type=${encodeURIComponent(searchType)}&keyword=${encodeURIComponent(keyword)}`;
+    fetchUsers(url);
+  }
+
+  // 重置搜索
+  function resetSearch() {
+    document.getElementById('searchKeyword').value = '';
+    fetchUsers('/api/users');
+  }
+
+  // 删除用户
+  async function deleteUser(userId) {
+    if (!confirm('确定要删除该用户吗？')) return;
+
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        alert('用户删除成功');
+        fetchUsers('/api/users'); // 刷新列表
+      } else {
+        throw new Error('删除操作失败');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('删除用户失败');
+    }
+  }
+</script>
+</body>
+</html>

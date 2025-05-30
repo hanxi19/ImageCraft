@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图艺工坊</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+
+</head>
+<body>
+    <!-- 新增固定导航栏 -->
+    <nav class="fixed-nav">
+        <div class="nav-container">
+<!--        	{% if current_user.username == 'root' %}-->
+                	<a th:href="@{/admin}">管理员面板</a>
+                    <a th:href="@{/index}">退出登录</a>
+                	<a th:href="@{/edit}">修改密码</a>
+
+<!--            {% elif current_user.is_authenticated %}-->
+            	<p align="center">欢迎, {{ current_user.username }}!</p>
+                <a th:href="@{/index}">退出登录</a>
+                <a th:href="@{/changepassword}">修改密码</a>
+                <a th:href="@{/edit}">图片裁剪</a>
+
+<!--            {% else %}-->
+                <a th:href="@{/register}">注册</a>
+                <a th:href="@{/logintest}">登录</a>
+                <a th:href="@{/edit}">图片裁剪</a>
+<!--            {% endif %}-->
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>图艺工坊</h1>
+
+    </div>
+
+    <script th:src="@{/script.js}"></script>
+</body>
+</html>

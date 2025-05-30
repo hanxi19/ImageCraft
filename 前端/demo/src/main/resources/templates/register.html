@@ -1,47 +1,310 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>注册</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='general.css') }}">
-    <style type="text/css">
-    .container a {
-	font-size: 24px;
-}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册账号</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#FF7D00',
+                        neutral: {
+                            100: '#F5F7FA',
+                            200: '#E5E6EB',
+                            300: '#C9CDD4',
+                            400: '#86909C',
+                            500: '#4E5969',
+                            600: '#272E3B',
+                            700: '#1D2129',
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .form-input-focus {
+                @apply focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none;
+            }
+            .btn-hover {
+                @apply hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300;
+            }
+            .card-shadow {
+                @apply shadow-[0_10px_30px_-5px_rgba(0,0,0,0.1)];
+            }
+            .toast-enter {
+                animation: toastIn 0.3s ease-out forwards;
+            }
+            .toast-leave {
+                animation: toastOut 0.3s ease-in forwards;
+            }
+            .bg-white rounded-2xl p-8 card-shadow {
+                justify-content: center;
+                align-items: center;
+            }
+            @keyframes toastIn {
+                from { opacity: 0; transform: translateY(-20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes toastOut {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(-20px); }
+            }
+        }
     </style>
 </head>
-<body>
-<div class="container">
-<h1>注册</h1>
-<form method="post">
-	<label for="username">邮箱:</label>
-    <input type="text" id="mail" name="mail" required>
-    
-  	<label for="username">用户名:</label>
-    <input type="text" id="username" name="username" required>
-    
-    <label for="password">密码:</label>
-    <input type="password" id="password" name="password" required>
-    
-    <label for="password2">确认密码:</label>
-    <input type="password" id="password2" name="password2" required><br>
-    
-    <button type="submit">注册</button>
-</form>
-<a href="{{ url_for('index') }}"><br>
-	<div class="flash-messages">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="message {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+<body class="font-inter bg-gradient-to-br from-neutral-100 to-white min-h-screen flex items-center justify-center p-4">
+<div class="w-full max-w-md">
+    <!-- 注册卡片 -->
+    <div class="bg-white rounded-2xl p-8 card-shadow">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                <i class="fa-solid fa-user-plus text-primary text-2xl"></i>
+            </div>
+            <h1 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-neutral-700">创建新账号</h1>
+            <p class="text-neutral-400 mt-2">加入我们，开启您的精彩旅程</p>
+        </div>
+
+        <!-- 注册表单 -->
+        <form method="post" class="space-y-5">
+            <div>
+                <label for="email" class="block text-sm font-medium text-neutral-600 mb-1">邮箱</label>
+                <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                    <input type="email" id="email" name="email" required
+                           class="w-full pl-10 pr-4 py-3 rounded-lg border border-neutral-200 form-input-focus transition-all"
+                           placeholder="example@mail.com">
+                </div>
+            </div>
+
+            <div>
+                <label for="username" class="block text-sm font-medium text-neutral-600 mb-1">用户名</label>
+                <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                    <input type="text" id="username" name="username" required
+                           class="w-full pl-10 pr-4 py-3 rounded-lg border border-neutral-200 form-input-focus transition-all"
+                           placeholder="请输入用户名">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-neutral-600 mb-1">密码</label>
+                <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                    <input type="password" id="password" name="password" required
+                           class="w-full pl-10 pr-4 py-3 rounded-lg border border-neutral-200 form-input-focus transition-all"
+                           placeholder="请输入密码">
+                </div>
+            </div>
+
+            <div>
+                <label for="password2" class="block text-sm font-medium text-neutral-600 mb-1">确认密码</label>
+                <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                    <input type="password" id="password2" name="password2" required
+                           class="w-full pl-10 pr-4 py-3 rounded-lg border border-neutral-200 form-input-focus transition-all"
+                           placeholder="请再次输入密码">
+                </div>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 btn-hover flex items-center justify-center">
+                <span>立即注册</span>
+                <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </form>
+
+        <!-- 返回链接 -->
+        <div class="mt-6 text-center">
+            <a th:href="@{/Tourist_Homepage}" class="text-neutral-500 hover:text-primary transition-colors duration-300 flex items-center justify-center">
+                <i class="fa-solid fa-arrow-left mr-2"></i>
+                <span>返回主页</span>
+            </a>
+        </div>
     </div>
-<br>
-返回主页</a>
+
+    <!-- 页脚信息 -->
+    <div class="mt-6 text-center text-neutral-400 text-sm">
+        <p>已有账号? <a th:href="@{/login}" class="text-primary hover:underline">立即登录</a></p>
+        <p class="mt-3">© Image-Craft 版权所有</p>
+    </div>
 </div>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+<!-- 错误提示框 -->
+<div id="toastMessage" class="fixed top-4 right-4 max-w-xs bg-white rounded-lg shadow-xl z-50 overflow-hidden opacity-0 pointer-events-none">
+    <div class="p-4 flex items-start">
+        <div class="flex-shrink-0 mt-0.5">
+            <i class="fa fa-exclamation-circle text-red-500 text-xl"></i>
+        </div>
+        <div class="ml-3 flex-1">
+            <h3 id="toastTitle" class="text-sm font-medium text-neutral-700">注册失败</h3>
+            <div class="mt-1">
+                <p id="toastContent" class="text-sm text-neutral-500">两次输入的密码不一致</p>
+            </div>
+        </div>
+        <div class="flex-shrink-0 ml-2">
+            <button id="closeToast" class="text-neutral-400 hover:text-neutral-600 focus:outline-none">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <div class="w-full h-1 bg-gradient-to-r from-red-500 to-red-400"></div>
+</div>
+
+<script>
+    // 显示错误提示框
+    function showToast(title, message, duration = 5000) {
+        const toast = document.getElementById('toastMessage');
+        const toastTitle = document.getElementById('toastTitle');
+        const toastContent = document.getElementById('toastContent');
+
+        // 设置内容
+        toastTitle.textContent = title;
+        toastContent.textContent = message;
+
+        // 显示提示框
+        toast.style.opacity = '1';
+        toast.style.pointerEvents = 'auto';
+        toast.classList.add('toast-enter');
+
+        // 设置定时器自动关闭
+        clearTimeout(toast.timeout);
+        toast.timeout = setTimeout(() => {
+            toast.classList.remove('toast-enter');
+            toast.classList.add('toast-leave');
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.pointerEvents = 'none';
+            }, 300);
+        }, duration);
+
+        // 点击关闭
+        document.getElementById('closeToast').onclick = () => {
+            clearTimeout(toast.timeout);
+            toast.classList.remove('toast-enter');
+            toast.classList.add('toast-leave');
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.pointerEvents = 'none';
+            }, 300);
+        };
+    }
+
+    // 表单验证和交互增强
+    document.addEventListener('DOMContentLoaded', function() {
+        // 输入框获得焦点时的动画效果
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('scale-[1.02]');
+                this.parentElement.style.transition = 'transform 0.3s ease';
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('scale-[1.02]');
+            });
+        });
+
+        // 密码强度检测
+        const passwordInput = document.getElementById('password');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                const strengthIndicator = document.createElement('div');
+                strengthIndicator.className = 'password-strength mt-1 h-1 rounded-full transition-all duration-300';
+
+                // 移除旧的强度指示器
+                const oldIndicator = this.parentElement.querySelector('.password-strength');
+                if (oldIndicator) {
+                    oldIndicator.remove();
+                }
+
+                // 添加新的强度指示器
+                if (password.length > 0) {
+                    let strength = 0;
+                    if (password.length >= 8) strength++;
+                    if (/[A-Z]/.test(password)) strength++;
+                    if (/[0-9]/.test(password)) strength++;
+                    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+                    let width, color;
+                    switch(strength) {
+                        case 1: width = '25%'; color = 'bg-red-500'; break;
+                        case 2: width = '50%'; color = 'bg-yellow-500'; break;
+                        case 3: width = '75%'; color = 'bg-blue-500'; break;
+                        case 4: width = '100%'; color = 'bg-green-500'; break;
+                        default: width = '0%'; color = 'bg-gray-200';
+                    }
+
+                    strengthIndicator.style.width = width;
+                    strengthIndicator.classList.add(color);
+                    this.parentElement.appendChild(strengthIndicator);
+                }
+            });
+        }
+
+        // 确认密码匹配检查
+        const password2Input = document.getElementById('password2');
+        if (password2Input) {
+            password2Input.addEventListener('input', function() {
+                const password = document.getElementById('password').value;
+                const confirmPassword = this.value;
+
+                if (password !== confirmPassword && confirmPassword.length > 0) {
+                    this.classList.add('border-red-500');
+                    this.classList.add('bg-red-50');
+                } else {
+                    this.classList.remove('border-red-500');
+                    this.classList.remove('bg-red-50');
+                }
+            });
+        }
+
+        // 表单提交验证
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('password2').value;
+
+                if (password !== confirmPassword) {
+                    e.preventDefault(); // 阻止表单提交
+                    showToast('注册失败', '两次输入的密码不一致');
+                    return false;
+                }
+
+                // 其他验证逻辑可以在这里添加
+                window.location.href = '/logintest';
+                return true;
+            });
+        }
+    });
+</script>
 </body>
 </html>
