@@ -22,8 +22,8 @@ public class DemoApplication {
         mailSender.setHost("smtp.qq.com");
         mailSender.setPort(465);  // 使用SSL加密的端口
 
-        mailSender.setUsername("2354669103@qq.com");
-        mailSender.setPassword("lrzetsahwwftebbc");  // 替换为QQ邮箱生成的授权码，非邮箱密码！
+        mailSender.setUsername("2936924721@qq.com");
+        mailSender.setPassword("gysawxjnqidvdfjh");  // 替换为QQ邮箱生成的授权码，非邮箱密码！
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");

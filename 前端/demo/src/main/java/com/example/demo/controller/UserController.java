@@ -113,7 +113,7 @@ public class UserController {
 //        return "register.html";
 //    }
 
-//    @PostMapping("/register")
+    //    @PostMapping("/register")
 //    public ResponseEntity<Map<String, Object>> processRegister(@RequestParam("email") String email,
 //                                  @RequestParam("username") String username,
 //                                  @RequestParam("password") String password,
@@ -155,25 +155,25 @@ public class UserController {
 //
 //
 //    }
-@PostMapping("/register")
-public String registerUser(@RequestParam String email,
-                           @RequestParam String username,
-                           @RequestParam String password,
-                           Model model) {
-    try {
-        User newUser = new User(email, username, password);
-        userRepository.save(newUser);
-        System.out.println("邮箱：" + email);
-        System.out.println("输入的用户名: " + username);
-        System.out.println("输入的密码: " + password);
+    @PostMapping("/register")
+    public String registerUser(@RequestParam String email,
+                               @RequestParam String username,
+                               @RequestParam String password,
+                               Model model) {
+        try {
+            User newUser = new User(email, username, password);
+            userRepository.save(newUser);
+            System.out.println("邮箱：" + email);
+            System.out.println("输入的用户名: " + username);
+            System.out.println("输入的密码: " + password);
 
-        // 注册成功后重定向到登录页面
-        return "redirect:/logintest";
-    } catch (Exception e) {
-        model.addAttribute("error", "注册失败：" + e.getMessage());
-        return "register"; // 返回注册页面并显示错误信息
+            // 注册成功后重定向到登录页面
+            return "redirect:/logintest";
+        } catch (Exception e) {
+            model.addAttribute("error", "注册失败：" + e.getMessage());
+            return "register"; // 返回注册页面并显示错误信息
+        }
     }
-}
 
 
 
@@ -182,31 +182,31 @@ public String registerUser(@RequestParam String email,
 //        return "forget_pwd";
 //    }
 
-//    @PostMapping("/sendResetPasswordEmail")
-//    public ResponseEntity sendResetPasswordEmail(@RequestParam String emailAddress) {
-//        User user = userRepository.findByEmail(emailAddress);
-//        if(user != null) {
-//            userService.sendResetPasswordEmail(emailAddress);
-//            return new ResponseEntity<>(HttpStatus.OK);
-//        }
-//        else
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//    }
+    @PostMapping("/sendResetPasswordEmail")
+    public ResponseEntity sendResetPasswordEmail(@RequestParam String emailAddress) {
+        User user = userRepository.findByEmail(emailAddress);
+        if(user != null) {
+            userService.sendResetPasswordEmail(emailAddress);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
-//    @PostMapping("/resetPassword")
-//    public ResponseEntity resetPassword(@RequestParam String emailAddress, @RequestParam String verificationCode, @RequestParam String newPassword) {
-//        if (userService.validateVerificationCode(emailAddress, verificationCode)) {
-////            userService.resetPassword(emailAddress, newPassword);
-//                    User user = userRepository.findByEmail(emailAddress);
-//            if(user != null) {
-//            user.setPassword(newPassword);
-//            userRepository.save(user);
-//        }
-//            return new ResponseEntity<>(HttpStatus.OK);
-//        } else {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-//    }
+    @PostMapping("/resetPassword")
+    public ResponseEntity resetPassword(@RequestParam String emailAddress, @RequestParam String verificationCode, @RequestParam String newPassword) {
+        if (userService.validateVerificationCode(emailAddress, verificationCode)) {
+//            userService.resetPassword(emailAddress, newPassword);
+            User user = userRepository.findByEmail(emailAddress);
+            if(user != null) {
+                user.setPassword(newPassword);
+                userRepository.save(user);
+            }
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 
 
 //    @GetMapping("/captcha")
