@@ -24,6 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User save(User user);
     List<User> findByUserNameContaining(String keyword);
     List<User> findByEmailContaining(String keyword);
+
+    List<User> findByUserNameNot(String root);
     //Optional<User> findByUserName(String username);
 
 }
