@@ -87,7 +87,7 @@ ImageCraft 图艺工坊是一个集成化图片处理平台，整合了多种图
 1. 克隆仓库：
 
    ```
-   git clone https://github.com/your-repo/imagecraft.git
+   git clone https://github.com/hanxi19/imagecraft.git
    cd imagecraft
    ```
 
