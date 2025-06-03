@@ -1,6 +1,6 @@
 # ImageCraft
+![为 ImageCraft 项目生成 logo(1)](https://github.com/user-attachments/assets/da49e909-a8dd-4260-a862-23f45498d80c)
 
-![为 ImageCraft 项目生成 logo(1)](G:\下载\为 ImageCraft 项目生成 logo(1).png)
 
 ## 项目简介
 
@@ -20,7 +20,7 @@ ImageCraft 图艺工坊是一个集成化图片处理平台，整合了多种图
 
 - 多图转GIF
 
-  ![image-20250603175414086](C:\Users\17204\AppData\Roaming\Typora\typora-user-images\image-20250603175414086.png)
+![image](https://github.com/user-attachments/assets/347cd226-5e36-4b2c-96ea-94bf625c03a2)
 
 ### 高级功能
 
@@ -28,37 +28,43 @@ ImageCraft 图艺工坊是一个集成化图片处理平台，整合了多种图
 
 用户通过涂抹覆盖目标物体，系统基于生成式图像修复系统**deepfill**生成自然背景填充空缺区域。
 
-![image-20250603172203377](C:\Users\17204\AppData\Roaming\Typora\typora-user-images\image-20250603172203377.png)
+![image](https://github.com/user-attachments/assets/770b755f-2bbf-4097-b55c-b619c119b1db)
+
 
 #### 2.图像语义分割
 
 上传图片并标注目标物体关键点（keypoint），系统通过 SAM 模型实现精准语义分割，返回独立的目标物体图像或背景图像。
 
-![image-20250603170510115](C:\Users\17204\AppData\Roaming\Typora\typora-user-images\image-20250603170510115.png)
+![image](https://github.com/user-attachments/assets/6a72da6d-d38e-4237-9f15-d1ae126908d8)
+
 
 #### 3.图片去划痕&噪点
 
 基于**Bringing-Old-Photos-Back-to-Life**框架，系统修复图片中的划痕或噪点，还原图片的良好质感。
 
-![image-20250603170620566](C:\Users\17204\AppData\Roaming\Typora\typora-user-images\image-20250603170620566.png)
+![image](https://github.com/user-attachments/assets/4b788e05-5646-4fe8-a35b-b2463623a627)
+
 
 #### 4.人像去红眼
 
 修复由于闪光灯导致的人像红眼问题。
 
-![image-20250603170658784](C:\Users\17204\AppData\Roaming\Typora\typora-user-images\image-20250603170658784.png)
+![image](https://github.com/user-attachments/assets/2a8d9964-c729-410f-a819-05438022aa10)
+
 
 #### 5. 图像生成
 
 输入种子值，基于**StyleGAN2** 模型生成逼真的猫、狗、艺术图像。
 
-![image-20250603171051340](C:\Users\17204\AppData\Roaming\Typora\typora-user-images\image-20250603171051340.png)
+![image](https://github.com/user-attachments/assets/250d70f3-ac14-4973-82fc-6bd32f5bba47)
+
 
 #### 6.OCR文字识别
 
 基于 **PaddleOCR** 模型提取图片中的文字内容
 
-![image-20250603171153914](C:\Users\17204\AppData\Roaming\Typora\typora-user-images\image-20250603171153914.png)
+![image](https://github.com/user-attachments/assets/99f6cb25-d311-405b-aa80-96356104dd13)
+
 
 #### 7.文字翻译
 
@@ -72,7 +78,7 @@ ImageCraft 图艺工坊是一个集成化图片处理平台，整合了多种图
 
 ### 环境要求
 
-- JDK 11+
+- JDK 22+
 - Python 3.8+
 - MySQL 8.0+
 
