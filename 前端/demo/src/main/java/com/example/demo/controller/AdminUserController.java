@@ -23,7 +23,8 @@ public class AdminUserController {
     // 获取所有用户
     @GetMapping
     public ResponseEntity<List<User>> getUsers() {
-        List<User> users = userRepository.findAll();
+//        List<User> users = userRepository.findAll();
+        List<User> users=userRepository.findByUserNameNot("root");
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 

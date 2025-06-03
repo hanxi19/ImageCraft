@@ -278,6 +278,9 @@
                 success: function() {
                     hideLoading();
                     showMessage('密码重置成功。', 'success');
+                    setTimeout(function() {
+                        window.location.href = '/login'; // 修改为实际登录页面路径
+                    }, 2000);
                 },
                 error: function() {
                     hideLoading();

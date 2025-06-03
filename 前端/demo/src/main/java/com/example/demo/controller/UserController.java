@@ -161,6 +161,14 @@ public class UserController {
                                @RequestParam String password,
                                Model model) {
         try {
+            if (userRepository.findByEmail(email)!=null) {
+                model.addAttribute("error", "注册失败：该邮箱已被注册");
+                return "register";
+            }
+            if(userRepository.findByUserName(username)!=null){
+                model.addAttribute("error","注册失败，用户名已存在");
+                return "register";
+            }
             User newUser = new User(email, username, password);
             userRepository.save(newUser);
             System.out.println("邮箱：" + email);
