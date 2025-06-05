@@ -1,44 +1,26 @@
 package com.example.demo.controller;
 
 import com.example.demo.pojo.User;
-
 import com.example.demo.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-
 import com.example.demo.service.UserService;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.ui.Model;
-
-import java.net.URI;
-import java.util.Map;
-import java.util.HashMap;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.OutputStream;
-
-import java.util.Random;
-import javax.imageio.ImageIO;
-
-import com.example.demo.repository.UserRepository;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 @Controller
 public class UserController {
@@ -125,11 +107,11 @@ public class UserController {
 
     }
 
-    @GetMapping("/register")
-    public String showRegisterPage(Model model) {
-        model.addAttribute("user", new User());
-        return "register.html";
-    }
+//    @GetMapping("/register")
+//    public String showRegisterPage(Model model) {
+//        model.addAttribute("user", new User());
+//        return "register.html";
+//    }
 
     //    @PostMapping("/register")
 //    public ResponseEntity<Map<String, Object>> processRegister(@RequestParam("email") String email,
@@ -179,6 +161,14 @@ public class UserController {
                                @RequestParam String password,
                                Model model) {
         try {
+            if (userRepository.findByEmail(email)!=null) {
+                model.addAttribute("error", "注册失败：该邮箱已被注册");
+                return "register";
+            }
+            if(userRepository.findByUserName(username)!=null){
+                model.addAttribute("error","注册失败，用户名已存在");
+                return "register";
+            }
             User newUser = new User(email, username, password);
             userRepository.save(newUser);
             System.out.println("邮箱：" + email);
@@ -195,10 +185,10 @@ public class UserController {
 
 
 
-    @GetMapping("/forget_pwd")
-    public String showForgetPasswordPage() {
-        return "forget_pwd";
-    }
+//    @GetMapping("/forget_pwd")
+//    public String showForgetPasswordPage() {
+//        return "forget_pwd";
+//    }
 
     @PostMapping("/sendResetPasswordEmail")
     public ResponseEntity sendResetPasswordEmail(@RequestParam String emailAddress) {
@@ -227,86 +217,86 @@ public class UserController {
     }
 
 
-    @GetMapping("/captcha")
-    public void getCaptcha(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            // 创建图片对象
-            int width = 120;
-            int height = 40;
-            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
-            // 绘制图形
-            Graphics2D g = image.createGraphics();
-            g.setColor(Color.WHITE);
-            g.fillRect(0, 0, width, height);
-            g.setFont(new Font("Arial", Font.BOLD, 30));
-
-            // 生成随机验证码
-            String characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-            Random random = new Random();
-            StringBuilder captcha = new StringBuilder();
-            for (int i = 0; i < 4; i++) {
-                char c = characters.charAt(random.nextInt(characters.length()));
-                captcha.append(c);
-                g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
-                g.drawString(String.valueOf(c), 30 * i + 10, 30);
-            }
-
-            // 添加干扰线
-            for (int i = 0; i < 5; i++) {
-                g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
-                g.drawLine(random.nextInt(width), random.nextInt(height),
-                        random.nextInt(width), random.nextInt(height));
-            }
-            g.dispose();
-
-            // 保存验证码到Session
-            request.getSession().setAttribute("CAPTCHA", captcha.toString());
-
-            // 输出图片
-            response.setContentType("image/png");
-            OutputStream out = response.getOutputStream();
-            ImageIO.write(image, "png", out);
-            out.close();
-            response.flushBuffer();
-        }catch (Exception e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-    }
+//    @GetMapping("/captcha")
+//    public void getCaptcha(HttpServletRequest request, HttpServletResponse response) {
+//        try {
+//            // 创建图片对象
+//            int width = 120;
+//            int height = 40;
+//            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+//
+//            // 绘制图形
+//            Graphics2D g = image.createGraphics();
+//            g.setColor(Color.WHITE);
+//            g.fillRect(0, 0, width, height);
+//            g.setFont(new Font("Arial", Font.BOLD, 30));
+//
+//            // 生成随机验证码
+//            String characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+//            Random random = new Random();
+//            StringBuilder captcha = new StringBuilder();
+//            for (int i = 0; i < 4; i++) {
+//                char c = characters.charAt(random.nextInt(characters.length()));
+//                captcha.append(c);
+//                g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+//                g.drawString(String.valueOf(c), 30 * i + 10, 30);
+//            }
+//
+//            // 添加干扰线
+//            for (int i = 0; i < 5; i++) {
+//                g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+//                g.drawLine(random.nextInt(width), random.nextInt(height),
+//                        random.nextInt(width), random.nextInt(height));
+//            }
+//            g.dispose();
+//
+//            // 保存验证码到Session
+//            request.getSession().setAttribute("CAPTCHA", captcha.toString());
+//
+//            // 输出图片
+//            response.setContentType("image/png");
+//            OutputStream out = response.getOutputStream();
+//            ImageIO.write(image, "png", out);
+//            out.close();
+//            response.flushBuffer();
+//        }catch (Exception e) {
+//            e.printStackTrace();
+//            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
     // 处理登录请求
-    @PostMapping("/login")
-    public Map<String, Object> login(
-            @RequestParam String username,
-            @RequestParam String password,
-            @RequestParam String captcha,
-            HttpServletRequest request) {
-
-        Map<String, Object> result = new HashMap<>();
-        System.out.println("输入的用户名: " + username);
-        System.out.println("输入的密码: " + password);
-        // 验证验证码
-        String sessionCaptcha = (String) request.getSession().getAttribute("CAPTCHA");
-        if (sessionCaptcha == null || !sessionCaptcha.equalsIgnoreCase(captcha)) {
-            result.put("code", 400);
-            result.put("message", "验证码错误");
-            System.out.println("验证码错误");
-            return result;
-        }
-
-        // 验证用户名密码（示例）
-        if ("admin".equals(username) && "admin".equals(password)) {
-            result.put("code", 200);
-            result.put("message", "登录成功");
-        } else {
-            result.put("code", 401);
-            result.put("message", "用户名或密码错误");
-        }
-
-        // 清除已用验证码
-        request.getSession().removeAttribute("CAPTCHA");
-        return result;
-    }
+//    @PostMapping("/login")
+//    public Map<String, Object> login(
+//            @RequestParam String username,
+//            @RequestParam String password,
+//            @RequestParam String captcha,
+//            HttpServletRequest request) {
+//
+//        Map<String, Object> result = new HashMap<>();
+//        System.out.println("输入的用户名: " + username);
+//        System.out.println("输入的密码: " + password);
+//        // 验证验证码
+//        String sessionCaptcha = (String) request.getSession().getAttribute("CAPTCHA");
+//        if (sessionCaptcha == null || !sessionCaptcha.equalsIgnoreCase(captcha)) {
+//            result.put("code", 400);
+//            result.put("message", "验证码错误");
+//            System.out.println("验证码错误");
+//            return result;
+//        }
+//
+//        // 验证用户名密码（示例）
+//        if ("admin".equals(username) && "admin".equals(password)) {
+//            result.put("code", 200);
+//            result.put("message", "登录成功");
+//        } else {
+//            result.put("code", 401);
+//            result.put("message", "用户名或密码错误");
+//        }
+//
+//        // 清除已用验证码
+//        request.getSession().removeAttribute("CAPTCHA");
+//        return result;
+//    }
 
 }

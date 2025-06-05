@@ -71,6 +71,14 @@
 </head>
 <body class="font-inter bg-gradient-to-br from-neutral-100 to-white min-h-screen flex items-center justify-center p-4">
 <div class="w-full max-w-md">
+    <div th:if="${not #strings.isEmpty(error)}"
+         class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"
+         id="backendError">
+        <div class="flex">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <span th:text="${error}"></span>
+        </div>
+    </div>
     <!-- 注册卡片 -->
     <div class="bg-white rounded-2xl p-8 card-shadow">
         <div class="text-center mb-8">
@@ -215,7 +223,21 @@
             }, 300);
         };
     }
+    //test
+    document.addEventListener('DOMContentLoaded', function() {
+        const errorElement = document.getElementById('backendError');
 
+        if (errorElement) {
+            // 5秒后自动隐藏
+            setTimeout(() => {
+                errorElement.classList.add('opacity-0');
+
+                setTimeout(() => {
+                    errorElement.style.display = 'none';
+                }, 300);
+            }, 2000);
+        }
+    });
     // 表单验证和交互增强
     document.addEventListener('DOMContentLoaded', function() {
         // 输入框获得焦点时的动画效果
@@ -290,6 +312,7 @@
         const form = document.querySelector('form');
         if (form) {
             form.addEventListener('submit', function(e) {
+
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('password2').value;
 
@@ -300,7 +323,7 @@
                 }
 
                 // 其他验证逻辑可以在这里添加
-                window.location.href = '/logintest';
+
                 return true;
             });
         }

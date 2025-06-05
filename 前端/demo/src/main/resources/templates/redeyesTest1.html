@@ -472,7 +472,7 @@
 
         <!-- 右侧登录注册 -->
         <div class="auth-links">
-            <a th:href="@{/changepassword}">修改密码</a>
+            <a th:href="@{/forget_pwd}">修改密码</a>
             <a th:href="@{/login}">退出登录</a>
         </div>
     </div>
@@ -658,34 +658,34 @@
             showError(uploadStatus, `上传失败: ${error.message}`);
         }
     });*/
-	// 修改文件输入监听方式（删除原表单submit监听）
-fileInput.addEventListener('change', async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+    // 修改文件输入监听方式（删除原表单submit监听）
+    fileInput.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    showStatus(uploadStatus, '正在上传图片...');
+        showStatus(uploadStatus, '正在上传图片...');
 
-    const formData = new FormData();
-    formData.append('image', file);
+        const formData = new FormData();
+        formData.append('image', file);
 
-    try {
-        const response = await fetch('http://localhost:8080/redeyes/uploads', {
-            method: 'POST',
-            body: formData,
-        });
-        const result = await response.json();
+        try {
+            const response = await fetch('http://localhost:8080/redeyes/uploads', {
+                method: 'POST',
+                body: formData,
+            });
+            const result = await response.json();
 
-        if (result.code === 1) {
-            oriImgUrl = result.oriImgUrl;
-            showSuccess(uploadStatus, '图片上传成功！');
-            loadImage(URL.createObjectURL(file));
-        } else {
-            showError(uploadStatus, `上传失败: ${result.msg}`);
+            if (result.code === 1) {
+                oriImgUrl = result.oriImgUrl;
+                showSuccess(uploadStatus, '图片上传成功！');
+                loadImage(URL.createObjectURL(file));
+            } else {
+                showError(uploadStatus, `上传失败: ${result.msg}`);
+            }
+        } catch (error) {
+            showError(uploadStatus, `上传失败: ${error.message}`);
         }
-    } catch (error) {
-        showError(uploadStatus, `上传失败: ${error.message}`);
-    }
-});
+    });
 
     // 加载图片到画布
     // function loadImage(url) {

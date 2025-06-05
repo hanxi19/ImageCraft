@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" th:href="@{/homee.css}" />
-	<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>图片裁剪 - 图艺工坊</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@
             position: relative;
             padding-bottom: 10px;
         }
-        
+
         .page-title::after {
             content: '';
             position: absolute;
@@ -54,11 +54,11 @@
             background: linear-gradient(to right, var(--primary-color), var(--success-color));
             border-radius: 2px;
         }
-        
+
         .form-group {
             margin-bottom: 25px;
         }
-        
+
         .form-label {
             display: block;
             margin-bottom: 10px;
@@ -67,18 +67,18 @@
             transition: var(--transition);
             cursor: pointer;
         }
-        
+
         .form-label:hover {
             color: var(--primary-color);
         }
-        
+
         .file-input-wrapper {
             position: relative;
             overflow: hidden;
             display: inline-block;
             width: 100%;
         }
-        
+
         .file-input-button {
             border: 2px dashed #d1d5db;
             border-radius: var(--border-radius);
@@ -89,24 +89,24 @@
             width: 100%;
             background-color: rgba(67, 97, 238, 0.03);
         }
-        
+
         .file-input-button:hover {
             border-color: var(--primary-color);
             background-color: rgba(67, 97, 238, 0.08);
         }
-        
+
         .file-input-button i {
             font-size: 2rem;
             color: var(--primary-color);
             margin-bottom: 12px;
         }
-        
+
         .file-input-button p {
             margin: 0;
             color: var(--gray-color);
             font-size: 0.95rem;
         }
-        
+
         #fileInput {
             position: absolute;
             left: 0;
@@ -116,13 +116,13 @@
             height: 100%;
             cursor: pointer;
         }
-        
+
         .form-buttons {
             display: flex;
             gap: 15px;
             margin-bottom: 25px;
         }
-        
+
         .btn {
             display: inline-block;
             border: none;
@@ -136,47 +136,47 @@
             flex: 1;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         .btn-submit {
             background-color: var(--primary-color);
             color: white;
             box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
         }
-        
+
         .btn-submit:hover {
             background-color: var(--secondary-color);
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
         }
-        
+
         .btn-download {
             background-color: var(--success-color);
             color: white;
             box-shadow: 0 4px 8px rgba(76, 201, 240, 0.2);
             opacity: 0.6;
         }
-        
+
         .btn-download:not([disabled]) {
             opacity: 1;
         }
-        
+
         .btn-download:hover:not([disabled]) {
             background-color: #3aa8d8;
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(76, 201, 240, 0.25);
         }
-        
+
         .btn-download[disabled] {
             background-color: #b0b0b0;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
-        
+
         .preview-container {
             margin-bottom: 25px;
         }
-        
+
         .image-preview-box {
             width: 100%;
             max-height: 70vh;
@@ -190,13 +190,13 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         .preview-image {
             display: block;
             max-width: 100%;
             max-height: 100%;
         }
-        
+
         .upload-hint {
             position: absolute;
             color: var(--gray-color);
@@ -204,19 +204,19 @@
             text-align: center;
             padding: 20px;
         }
-        
+
         .result-preview {
             margin-top: 30px;
             padding-top: 20px;
             border-top: 1px solid #eee;
             display: none;
         }
-        
+
         .result-preview h4 {
             color: var(--primary-color);
             margin-bottom: 15px;
         }
-        
+
         .back-link {
             display: inline-block;
             margin-top: 30px;
@@ -224,36 +224,36 @@
             text-decoration: none;
             transition: var(--transition);
         }
-        
+
         .back-link:hover {
             color: var(--secondary-color);
             text-decoration: underline;
         }
-        
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
             }
-            
+
             .page-title {
                 font-size: 1.8rem;
             }
-            
+
             .form-buttons {
                 flex-direction: column;
             }
-            
+
             .btn {
                 width: 100%;
             }
-            
+
             .image-preview-box {
                 min-height: 250px;
             }
         }
     </style>
-    
-    
+
+
 
 </head>
 <body>
@@ -264,105 +264,105 @@
 
         <!-- 右侧登录注册 -->
         <div class="auth-links">
-            <a th:href="@{/changepassword}">修改密码</a>
+            <a th:href="@{/forget_pwd}">修改密码</a>
             <a th:href="@{/login}">退出登录</a>
         </div>
     </div>
 </nav>
 
-    <!-- 左侧功能导航 -->
+<!-- 左侧功能导航 -->
 
-    <div class="features-container">
-        <nav class="features-nav">
-            <a href="Picture_croppingmem" class="feature-btn">
-                <span class="btn-text">图片裁剪</span>
-            </a>
-            <a href="Compressmem" class="feature-btn">
-                <span class="btn-text">图片压缩</span>
-            </a>
-            <a href="Conversionmem" class="feature-btn">
-                <span class="btn-text">格式转换</span>
-            </a>
-            <a href="Test_Addedmem" class="feature-btn">
-                <span class="btn-text">添加文字</span>
-            </a>
-            <a href="GIFmem" class="feature-btn">
-                <span class="btn-text">生成GIF</span>
-            </a>
-            <a href="scratchTest3" class="feature-btn">
-                <span class="btn-text">图片去划痕</span>
-            </a>
-            <a href="redeyesTest1" class="feature-btn">
-                <span class="btn-text">图片去红眼</span>
-            </a>
-            <a href="deepfill" class="feature-btn">
-                <span class="btn-text">水印与物体去除</span>
-            </a>
-            <a href="stylegabtest2" class="feature-btn">
-                <span class="btn-text">图片生成</span>
-            </a>
-            <a href="denoisingTest" class="feature-btn">
-                <span class="btn-text">图片去噪点</span>
-            </a>
-            <a href="OCR" class="feature-btn">
-                <span class="btn-text">文字识别</span>
-            </a>
-            <a href="SAM" class="feature-btn">
-                <span class="btn-text">图像分割</span>
-            </a>
-        </nav>
-    </div>
-    
-    <!-- 功能内容区 -->
-    <div class="main-container">
-        <h1 class="page-title">图片裁剪</h1>
-        
-        <!-- 文件选择区域 -->
-        <div class="form-group">
-            <label for="fileInput" class="form-label">选择图片：</label>
-            <div class="file-input-wrapper">
-                <div class="file-input-button">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>点击或拖放图片到此处</p>
-                </div>
-                <input 
-                    type="file" 
-                    id="fileInput" 
-                    accept="image/*" 
+<div class="features-container">
+    <nav class="features-nav">
+        <a href="Picture_croppingmem" class="feature-btn">
+            <span class="btn-text">图片裁剪</span>
+        </a>
+        <a href="Compressmem" class="feature-btn">
+            <span class="btn-text">图片压缩</span>
+        </a>
+        <a href="Conversionmem" class="feature-btn">
+            <span class="btn-text">格式转换</span>
+        </a>
+        <a href="Test_Addedmem" class="feature-btn">
+            <span class="btn-text">添加文字</span>
+        </a>
+        <a href="GIFmem" class="feature-btn">
+            <span class="btn-text">生成GIF</span>
+        </a>
+        <a href="scratchTest3" class="feature-btn">
+            <span class="btn-text">图片去划痕</span>
+        </a>
+        <a href="redeyesTest1" class="feature-btn">
+            <span class="btn-text">图片去红眼</span>
+        </a>
+        <a href="deepfill" class="feature-btn">
+            <span class="btn-text">水印与物体去除</span>
+        </a>
+        <a href="stylegabtest2" class="feature-btn">
+            <span class="btn-text">图片生成</span>
+        </a>
+        <a href="denoisingTest" class="feature-btn">
+            <span class="btn-text">图片去噪点</span>
+        </a>
+        <a href="OCR" class="feature-btn">
+            <span class="btn-text">文字识别</span>
+        </a>
+        <a href="SAM" class="feature-btn">
+            <span class="btn-text">图像分割</span>
+        </a>
+    </nav>
+</div>
+
+<!-- 功能内容区 -->
+<div class="main-container">
+    <h1 class="page-title">图片裁剪</h1>
+
+    <!-- 文件选择区域 -->
+    <div class="form-group">
+        <label for="fileInput" class="form-label">选择图片：</label>
+        <div class="file-input-wrapper">
+            <div class="file-input-button">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>点击或拖放图片到此处</p>
+            </div>
+            <input
+                    type="file"
+                    id="fileInput"
+                    accept="image/*"
                     required
-                >
-            </div>
+            >
         </div>
-        
-        <!-- 操作按钮组 -->
-        <div class="form-buttons">
-            <button class="btn btn-submit" onclick="handleCrop()">
-                <i class="fas fa-crop"></i> 执行裁剪
-            </button>
-            <button class="btn btn-download" onclick="downloadResult()" disabled id="downloadBtn">
-                <i class="fas fa-download"></i> 下载结果
-            </button>
-        </div>
+    </div>
 
-        <!-- 图片预览容器 -->
-        <div class="preview-container">
-            <div class="image-preview-box">
-                <img id="previewImage" class="preview-image">
-                <div class="upload-hint">请选择图片</div>
-            </div>
-        </div>
+    <!-- 操作按钮组 -->
+    <div class="form-buttons">
+        <button class="btn btn-submit" onclick="handleCrop()">
+            <i class="fas fa-crop"></i> 执行裁剪
+        </button>
+        <button class="btn btn-download" onclick="downloadResult()" disabled id="downloadBtn">
+            <i class="fas fa-download"></i> 下载结果
+        </button>
+    </div>
 
-        <!-- 裁剪结果预览 -->
-        <div class="result-preview" id="resultPreview">
-            <h4>裁剪结果：</h4>
-            <img id="croppedResult" class="preview-image">
+    <!-- 图片预览容器 -->
+    <div class="preview-container">
+        <div class="image-preview-box">
+            <img id="previewImage" class="preview-image">
+            <div class="upload-hint">请选择图片</div>
         </div>
-        
+    </div>
+
+    <!-- 裁剪结果预览 -->
+    <div class="result-preview" id="resultPreview">
+        <h4>裁剪结果：</h4>
+        <img id="croppedResult" class="preview-image">
+    </div>
+
 </div>
 <!-- 引入依赖 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 
-    <script>
+<script>
     let cropper = null;
     let croppedBlob = null;
 
@@ -382,7 +382,7 @@
     function initCropper(imageSrc) {
         const img = document.getElementById('previewImage');
         const hint = document.querySelector('.upload-hint');
-        
+
         hint.style.display = 'none';
         img.src = imageSrc;
 
@@ -430,17 +430,17 @@
                 alert('生成裁剪图片失败');
                 return;
             }
-            
+
             croppedBlob = blob;
             const url = URL.createObjectURL(blob);
             const resultImg = document.getElementById('croppedResult');
             resultImg.src = url;
-            
+
             const resultPreview = document.getElementById('resultPreview');
             resultPreview.style.display = 'block';
-            
+
             document.getElementById('downloadBtn').disabled = false;
-            
+
             // 滚动到结果区域
             resultPreview.scrollIntoView({ behavior: 'smooth' });
         }, 'image/png', 0.95);
@@ -449,7 +449,7 @@
     // 下载结果
     function downloadResult() {
         if (!croppedBlob) return;
-        
+
         const url = URL.createObjectURL(croppedBlob);
         const a = document.createElement('a');
         a.download = `cropped-${new Date().toISOString().slice(0, 10)}.png`;
@@ -462,29 +462,29 @@
 
     // 拖放功能
     const dropArea = document.querySelector('.file-input-button');
-    
+
     dropArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropArea.style.borderColor = 'var(--primary-color)';
         dropArea.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
     });
-    
+
     dropArea.addEventListener('dragleave', () => {
         dropArea.style.borderColor = '#d1d5db';
         dropArea.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
     });
-    
+
     dropArea.addEventListener('drop', (e) => {
         e.preventDefault();
         dropArea.style.borderColor = '#d1d5db';
         dropArea.style.backgroundColor = 'rgba(67, 97, 238, 0.03)';
-        
+
         if (e.dataTransfer.files.length) {
             document.getElementById('fileInput').files = e.dataTransfer.files;
             const event = new Event('change');
             document.getElementById('fileInput').dispatchEvent(event);
         }
     });
-    </script>
+</script>
 </body>
 </html>
