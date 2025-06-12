@@ -242,7 +242,7 @@ public class HelloController {
             System.out.println("400");
             return result;
         }
-
+        int count=0;
         // 验证用户名密码（示例）
         if ("admin".equals(username) && "admin".equals(password)) {
             result.put("code", 200);
@@ -251,7 +251,9 @@ public class HelloController {
             result.put("code", 401);
             result.put("message", "用户名或密码错误");
             //System.out.println("400");
+
         }
+
 
         // 清除已用验证码
         request.getSession().removeAttribute("CAPTCHA");

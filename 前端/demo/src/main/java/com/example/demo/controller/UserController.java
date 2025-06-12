@@ -5,6 +5,7 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,7 +49,7 @@ public class UserController {
                                @RequestParam String captcha,HttpServletRequest request,
                                Model model) {
 
-
+        int count=0;
         //User user = userRepository.findByUserName(username);
 
         System.out.println("输入的用户名: " + username);
@@ -68,33 +69,59 @@ public class UserController {
         }
         else {
             System.out.println("验证码正确");
-            if (user != null && user.getPassword().equals(password)) {
+// 获取或初始化密码错误计数器
+            HttpSession session = request.getSession();
+            Integer loginAttempts = (Integer) session.getAttribute("loginAttempts");
+            if (loginAttempts == null) {
+                loginAttempts = 0;
+            }
+            if (user != null ) {
 
-                if (user.getUserName().equals("root")) {
-                    return "admin";
+                if(user.getPassword().equals(password)) {
+                    session.setAttribute("loginAttempts", 0);
+                    if (user.getUserName().equals("root")) {
+                        return "admin";
 
-                }
-                else {
+                    } else {
 //                    response.put("code", 200);
 //                    response.put("msg", "登录成功");
-                    result.put("code", 200);
-                    result.put("message", "success");
-                    Map<String, Object> userData = new HashMap<>();
-                    userData.put("email", user.getEmail());
-                    userData.put("username", user.getUserName());
-                    userData.put("password", user.getPassword());
+                        result.put("code", 200);
+                        result.put("message", "success");
+                        Map<String, Object> userData = new HashMap<>();
+                        userData.put("email", user.getEmail());
+                        userData.put("username", user.getUserName());
+                        userData.put("password", user.getPassword());
 //                    result.put("data", userData);
-                    //return new ResponseEntity<>(response, HttpStatus.OK);
-                    //model.addAttribute("response", response);
-                    model.addAttribute("result", result);
-                    return "Member_Homepage";
+                        //return new ResponseEntity<>(response, HttpStatus.OK);
+                        //model.addAttribute("response", response);
+                        model.addAttribute("result", result);
+                        return "Member_Homepage";
+                    }
                 }
+                else
+                {
+                    loginAttempts++;
+                    session.setAttribute("loginAttempts", loginAttempts);
 
+                    // 检查是否达到最大尝试次数
+                    if (loginAttempts >= 3) {
+                        // 锁定账户或执行其他操作
+                        System.out.println("账户 " + username + " 已被锁定，尝试次数: " + loginAttempts);
+                        model.addAttribute("error", "密码错误次数过多，账户已锁定");
+                        return "login";
+                    } else {
+                        System.out.println("密码错误，尝试次数: " + loginAttempts);
+                        int remainingAttempts=3-loginAttempts;
+                        model.addAttribute("error","密码错误，请重试。你还剩 " + remainingAttempts + " 次机会。");
+                        return "login";
+                    }
+
+                }
             }
 
             else {
                 result.put("code", 0);
-                result.put("message", "用户名或密码错误");
+                result.put("message", "用户不存在");
                 result.put("data", null);
 //                model.addAttribute("response", result);
                 //将错误信息传递给前端
@@ -167,6 +194,14 @@ public class UserController {
             }
             if(userRepository.findByUserName(username)!=null){
                 model.addAttribute("error","注册失败，用户名已存在");
+                return "register";
+            }
+            if(username.length()>12||username.length()<4){
+                model.addAttribute("error","请控制用户名长度为4--12字符");
+                return "register";
+            }
+            if(password.length()>12||password.length()<6){
+                model.addAttribute("error","请控制密码长度为6--12字符");
                 return "register";
             }
             User newUser = new User(email, username, password);
