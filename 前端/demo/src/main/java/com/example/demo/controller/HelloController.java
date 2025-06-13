@@ -173,7 +173,10 @@ public class HelloController {
     public String showregisterPage() {return "register";}
     @GetMapping("/forget_pwd")
     public String showforgetpwdPage() {return "forget_pwd";}
-
+    @GetMapping("/TRANS")
+    public String showTRANSPage() {return "TRANS";}
+    @GetMapping("/deepfill2")
+    public String showdeepfill2Page() {return "deepfill2";}
     // 生成验证码
     @GetMapping("/captcha")
     public void getCaptcha(HttpServletRequest request, HttpServletResponse response) {

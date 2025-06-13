@@ -4,11 +4,10 @@
   <link rel="stylesheet" th:href="@{/homee.css}" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OCR文字识别与翻译系统</title>
+  <title>OCR图片识别</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* 保持第一个示例的CSS变量和样式 */
     :root {
       --primary-color: #4361ee;
       --primary-light: #6b85f1;
@@ -28,31 +27,33 @@
       margin-left: 20px; /* 增加左侧边距 */
       max-width: calc(100%); /* 动态计算最大宽度 */
     }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    h1 {
-      color: var(--primary-color);
-      font-size: 2.2rem;
-      margin-bottom: 30px;
-      position: relative;
-      display: inline-block;
-      padding-bottom: 10px;
+    header {
       text-align: center;
-      width: 100%;
+      margin-bottom: 30px;
     }
 
-    h1::after {
+    h1, h2, h3 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      position: relative;
+      display: inline-block;
+      padding-bottom: 5px;
+    }
+
+    h1::after, h2::after {
       content: '';
       position: absolute;
       bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80px;
-      height: 4px;
+      left: 0;
+      width: 50px;
+      height: 3px;
       background: linear-gradient(to right, var(--primary-color), var(--success-color));
       border-radius: 2px;
     }
@@ -73,6 +74,13 @@
 
     .form-group {
       margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 500;
+      color: var(--dark-color);
     }
 
     .file-input-wrapper {
@@ -104,6 +112,40 @@
       margin-bottom: 12px;
     }
 
+    .file-input-button p {
+      margin: 0;
+      color: var(--gray-color);
+      font-size: 0.95rem;
+    }
+
+    #imageInput {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    select {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 15px 0;
+      border: 1px solid #d1d5db;
+      border-radius: var(--border-radius);
+      font-family: 'Poppins', sans-serif;
+      background-color: white;
+      transition: var(--transition);
+    }
+
+    select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
     .btn {
       display: inline-block;
       background-color: var(--primary-color);
@@ -116,10 +158,8 @@
       cursor: pointer;
       transition: var(--transition);
       text-align: center;
-      width: auto;
-      min-width: 150px;
+      width: 100%;
       box-shadow: 0 4px 8px rgba(67, 97, 238, 0.2);
-      margin: 5px;
     }
 
     .btn:hover {
@@ -128,10 +168,21 @@
       box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
     }
 
+    .btn:disabled {
+      background-color: #b0b0b0;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
     .status {
       padding: 14px;
       border-radius: var(--border-radius);
-      margin: 15px 0;
+      margin-bottom: 18px;
       display: flex;
       align-items: center;
       font-size: 0.95rem;
@@ -167,79 +218,34 @@
       border-left-color: var(--primary-color);
     }
 
-    .tab-container {
-      display: flex;
-      margin: 15px 0;
-      border-bottom: 2px solid var(--primary-color);
-    }
-
-    .tab {
-      padding: 12px 30px;
-      cursor: pointer;
-      background-color: transparent;
-      color: var(--gray-color);
-      transition: var(--transition);
-      border-radius: var(--border-radius) var(--border-radius) 0 0;
-      position: relative;
-    }
-
-    .tab.active {
-      color: var(--primary-color);
-      background-color: rgba(67, 97, 238, 0.1);
-    }
-
-    .tab-content {
-      display: none;
-      padding: 20px 0;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .text-area {
+    .preview-img {
       width: 100%;
-      min-height: 200px;
+      border-radius: var(--border-radius);
+      border: 1px solid #eee;
+      margin-top: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      display: none;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
       padding: 15px;
-      border: 2px solid #e9ecef;
+      border: 1px solid #d1d5db;
       border-radius: var(--border-radius);
       font-family: 'Poppins', sans-serif;
       resize: vertical;
       transition: var(--transition);
     }
 
-    .text-area:focus {
+    textarea:focus {
       border-color: var(--primary-color);
       outline: none;
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
     }
 
-    .language-selector {
-      margin: 15px 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    select {
-      padding: 8px 12px;
-      border-radius: var(--border-radius);
-      border: 2px solid #e9ecef;
-      background-color: white;
-      font-family: 'Poppins', sans-serif;
-      transition: var(--transition);
-    }
-
-    select:focus {
-      border-color: var(--primary-color);
-      outline: none;
-    }
-
-    .image-preview {
-      max-width: 100%;
-      height: auto;
-      border-radius: var(--border-radius);
-      margin-top: 15px;
-      box-shadow: var(--box-shadow);
+    .result-box {
+      margin-top: 20px;
     }
 
     @media (max-width: 768px) {
@@ -255,23 +261,12 @@
         padding: 20px;
       }
 
-      .btn {
-        width: 100%;
-        margin: 5px 0;
-      }
-
-      .tab-container {
-        flex-wrap: wrap;
-      }
-
-      .tab {
-        flex: 1;
-        text-align: center;
-        padding: 10px;
-        font-size: 0.9rem;
+      .file-input-button {
+        padding: 25px 15px;
       }
     }
   </style>
+
 
 </head>
 <body>
@@ -295,16 +290,16 @@
     <a href="Picture_croppingmem" class="feature-btn">
       <span class="btn-text">图片裁剪</span>
     </a>
-    <a href="Compressmem" class="feature-btn">
+    <a href="Compress" class="feature-btn">
       <span class="btn-text">图片压缩</span>
     </a>
-    <a href="Conversionmem" class="feature-btn">
+    <a href="Conversion" class="feature-btn">
       <span class="btn-text">格式转换</span>
     </a>
-    <a href="Test_Addedmem" class="feature-btn">
+    <a href="Test_Added" class="feature-btn">
       <span class="btn-text">添加文字</span>
     </a>
-    <a href="GIFmem" class="feature-btn">
+    <a href="GIF" class="feature-btn">
       <span class="btn-text">生成GIF</span>
     </a>
     <a href="scratchTest3" class="feature-btn">
@@ -314,7 +309,10 @@
       <span class="btn-text">图片去红眼</span>
     </a>
     <a href="deepfill" class="feature-btn">
-      <span class="btn-text">水印与物体去除</span>
+      <span class="btn-text">图片物体清除</span>
+    </a>
+    <a href="deepfill2" class="feature-btn">
+      <span class="btn-text">图片水印清除</span>
     </a>
     <a href="stylegabtest2" class="feature-btn">
       <span class="btn-text">图片生成</span>
@@ -325,6 +323,9 @@
     <a href="OCR" class="feature-btn">
       <span class="btn-text">文字识别</span>
     </a>
+    <a href="TRANS" class="feature-btn">
+      <span class="btn-text">文字翻译</span>
+    </a>
     <a href="SAM" class="feature-btn">
       <span class="btn-text">图像分割</span>
     </a>
@@ -333,347 +334,107 @@
 
 <!-- 功能内容区 -->
 <div class="main-container">
-  <h1>OCR文字识别与翻译系统</h1>
+  <header>
+    <h1>OCR图片识别</h1>
+  </header>
 
-  <!-- 在HTML部分修改上传区域 -->
   <div class="card">
-    <div class="upload-section">
-      <div class="file-input-wrapper">
-        <form id="uploadForm">
+    <form id="ocrForm">
+      <div class="form-group">
+        <label for="imageInput">选择图片 (JPG/PNG):</label>
+        <div class="file-input-wrapper">
           <div class="file-input-button">
-            <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--primary-color); margin-bottom: 15px;"></i>
-            <p style="color: var(--gray-color); margin-bottom: 20px;">拖放图片或点击上传 (JPG/PNG, 最大5MB)</p>
-            <input type="file" id="imageUpload" name="image" accept="image/*" required style="display: none;">
-            <button type="button" class="btn" onclick="document.getElementById('imageUpload').click()">
-              <i class="fas fa-folder-open"></i> 选择文件
-            </button>
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>点击上传图片</p>
           </div>
-        </form>
+          <input type="file" id="imageInput" name="image" accept="image/jpeg,image/png" required />
+        </div>
       </div>
-      <div id="uploadStatus" class="status-box"></div>
-    </div>
 
-    <div class="language-selector">
-      <label>源语言:</label>
-      <select id="sourceLanguage">
-        <option value="ch">中文</option>
-        <option value="en">英文</option>
-        <option value="ja">日文</option>
-      </select>
-    </div>
+      <div class="form-group">
+        <label for="langSelect">选择识别语言:</label>
+        <select id="langSelect">
+          <option value="ch">中文</option>
+          <option value="en">英文</option>
+        </select>
+      </div>
 
-    <div id="imagePreviewContainer" style="display: none;">
-      <h3>上传的图片:</h3>
-      <img id="imagePreview" class="image-preview">
-    </div>
+      <button type="submit" class="btn">
+        <i class="fas fa-search"></i> 上传并识别
+      </button>
+    </form>
+
+    <img id="preview" class="preview-img" />
   </div>
 
   <div class="card">
-    <h2>文字识别与翻译</h2>
-    <div class="language-selector">
-      <label>目标语言:</label>
-      <select id="targetLanguage">
-        <option value="en">英文</option>
-        <option value="ja">日文</option>
-        <option value="ko">韩文</option>
-        <option value="fr">法文</option>
-        <option value="de">德文</option>
-      </select>
-    </div>
-
-    <button class="btn" id="recognizeBtn" disabled>
-      <i class="fas fa-eye"></i> 识别文字
-    </button>
-
-    <div id="recognizeStatus" class="status status-info">
+    <h2>识别结果</h2>
+    <div class="status status-info" id="ocrStatus">
       <i class="fas fa-info-circle"></i>
-      <span>等待图片上传</span>
+      <span>等待上传图片进行识别</span>
     </div>
 
-    <div class="tab-container">
-      <div class="tab active" data-tab="ocr">OCR识别结果</div>
-      <div class="tab" data-tab="translation">翻译结果</div>
-    </div>
-
-    <div id="ocrTab" class="tab-content active">
-      <h3>OCR识别结果 (可编辑):</h3>
-      <textarea id="ocrTextArea" class="text-area" placeholder="识别结果将显示在这里..." disabled></textarea>
-      <div class="button-group">
-        <button class="btn" id="saveEditBtn" disabled>
-          <i class="fas fa-save"></i> 保存修改
-        </button>
-        <button class="btn" id="translateBtn" disabled>
-          <i class="fas fa-language"></i> 翻译文本
-        </button>
-      </div>
-    </div>
-
-    <div id="translationTab" class="tab-content">
-      <h3>翻译结果:</h3>
-      <div id="translationResult" class="text-area" style="min-height: 150px;" readonly>
-        翻译结果将显示在这里...
-      </div>
+    <div class="result-box">
+      <textarea id="ocrResult" readonly></textarea>
     </div>
   </div>
 </div>
 <script>
-  const STATUS_STYLE = {
-    SUCCESS: 'status-success',
-    ERROR: 'status-error'
-  };
+  document.getElementById('imageInput').addEventListener('change', function(e){
+    const ocrStatus = document.getElementById('ocrStatus');
+    ocrStatus.innerHTML = '<i class="fas fa-info-circle"></i> <span>已选择图片，请点击"上传并识别"按钮</span>';
+    if (this.files && this.files[0]) {
+      let reader = new FileReader();
+      reader.onload = function(ev) {
+        document.getElementById('preview').src = ev.target.result;
+        document.getElementById('preview').style.display = 'block';
+      };
+      reader.readAsDataURL(this.files[0]);
+    }
+  });
 
-  function initStatus(element) {
-    element.className = 'status-box';
-    element.innerHTML = '';
-  }
+  document.getElementById('ocrForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const imageInput = document.getElementById('imageInput');
+    const lang = document.getElementById('langSelect').value;
+    if (!imageInput.files.length) return;
 
-  function showStatus(element, message, style = '') {
-    initStatus(element);
-    element.classList.add(style);
-    element.innerHTML = `
-        <i class="fas fa-spinner fa-pulse"></i>
-        <span>${message}</span>
-    `;
-  }
-
-  function showSuccess(element, message) {
-    initStatus(element);
-    element.classList.add(STATUS_STYLE.SUCCESS);
-    element.innerHTML = `
-        <i class="fas fa-check-circle"></i>
-        <span>${message}</span>
-    `;
-  }
-
-  function showError(element, message) {
-    initStatus(element);
-    element.classList.add(STATUS_STYLE.ERROR);
-    element.innerHTML = `
-        <i class="fas fa-exclamation-circle"></i>
-        <span>${message}</span>
-    `;
-  }
-
-  let currentFilename = null;
-  let currentOcrResultPath = null;
-  let currentTranslateResultPath = null;
-  document.getElementById('imageUpload').addEventListener('change', async function(event) {
-    const file = event.target.files[0];
-    const uploadStatus = document.getElementById('uploadStatus');
-    const recognizeBtn = document.getElementById('recognizeBtn');
-    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-
-    if (!file) return;
-
-    showStatus(uploadStatus, '正在上传图片...');
-
+    // 上传图片
     const formData = new FormData();
-    formData.append('image', file);
-
-    try {
-      const response = await fetch('http://localhost:8080/ocr/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      const result = await response.json();
-
-      if (result.code === 1) {
-        showSuccess(uploadStatus, '图片上传成功！');
-        currentFilename = result.data.filename;
-
-        // 显示预览图片
-        const imagePreview = document.getElementById('imagePreview');
-        imagePreview.src = URL.createObjectURL(file);
-        imagePreviewContainer.style.display = 'block';
-
-        // 启用识别按钮
-        recognizeBtn.disabled = false;
-      } else {
-        showError(uploadStatus, `上传失败: ${result.msg}`);
-        recognizeBtn.disabled = true;
-      }
-    } catch (error) {
-      showError(uploadStatus, `上传失败: ${error.message}`);
-      recognizeBtn.disabled = true;
-    }
-  });
-
-  // 识别文字
-  document.getElementById('recognizeBtn').addEventListener('click', async function() {
-    if (!currentFilename) {
-      showStatus(document.getElementById('recognizeStatus'), '请先上传图片', 'error');
-      return;
-    }
-
-    const recognizeStatus = document.getElementById('recognizeStatus');
-    const ocrTextArea = document.getElementById('ocrTextArea');
-    const saveEditBtn = document.getElementById('saveEditBtn');
-    const translateBtn = document.getElementById('translateBtn');
-    const sourceLang = document.getElementById('sourceLanguage').value;
-
-    try {
-      showStatus(recognizeStatus, '识别中...');
-
-      // 调用识别接口
-      const recognizeResponse = await fetch('http://localhost:8080/ocr/recognize', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          imageUrl: `/ocr/images/${currentFilename}`,
-          lang: sourceLang
-        })
-      });
-
-      const recognizeResult = await recognizeResponse.json();
-
-      if (recognizeResult.code === 1) {
-        showStatus(recognizeStatus, '识别成功', 'success');
-        currentOcrResultPath = recognizeResult.data.ocr_result_txt;
-
-        // 获取识别结果内容
-        const contentResponse = await fetch(`http://localhost:8080/ocr/result/content?resultFilePath=${encodeURIComponent(currentOcrResultPath)}`);
-        const contentResult = await contentResponse.json();
-
-        if (contentResult.code === 1) {
-          ocrTextArea.value = contentResult.data;
-          ocrTextArea.disabled = false;
-          saveEditBtn.disabled = false;
-          translateBtn.disabled = false;
-        } else {
-          ocrTextArea.value = '获取识别结果失败: ' + (contentResult.msg || '未知错误');
-        }
-      } else {
-        showStatus(recognizeStatus, recognizeResult.msg || '识别失败', 'error');
-        ocrTextArea.value = '识别失败: ' + (recognizeResult.msg || '未知错误');
-      }
-    } catch (error) {
-      showStatus(recognizeStatus, '识别失败: ' + error.message, 'error');
-      ocrTextArea.value = '识别过程中发生错误: ' + error.message;
-    }
-  });
-
-  // 保存编辑
-  document.getElementById('saveEditBtn').addEventListener('click', async function() {
-    if (!currentOcrResultPath) {
-      alert('没有可保存的OCR结果');
-      return;
-    }
-
-    const ocrTextArea = document.getElementById('ocrTextArea');
-    const editedText = ocrTextArea.value;
-
-    try {
-      const response = await fetch('http://localhost:8080/ocr/translate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ocrResultPath: currentOcrResultPath,
-          editedText: editedText,
-          targetLang: document.getElementById('targetLanguage').value
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.code === 0) {
-        showStatus(document.getElementById('recognizeStatus'), '修改已保存', 'success');
-      } else {
-        throw new Error(result.msg || '保存失败');
-      }
-    } catch (error) {
-      showStatus(document.getElementById('recognizeStatus'), '保存失败: ' + error.message, 'error');
-    }
-  });
-
-  // 翻译文本
-  document.getElementById('translateBtn').addEventListener('click', async function() {
-    if (!currentOcrResultPath) {
-      showStatus(document.getElementById('recognizeStatus'), '没有可翻译的文本', 'error');
-      return;
-    }
-
-    const ocrTextArea = document.getElementById('ocrTextArea');
-    const editedText = ocrTextArea.value;
-    const targetLang = document.getElementById('targetLanguage').value;
-    const translationResult = document.getElementById('translationResult');
-    const recognizeStatus = document.getElementById('recognizeStatus');
-
-    try {
-      showStatus(recognizeStatus, '翻译中...');
-
-      // 1. 先保存编辑
-      const saveResponse = await fetch('http://localhost:8080/ocr/translate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ocrResultPath: currentOcrResultPath,
-          editedText: editedText,
-          targetLang: targetLang
-        })
-      });
-
-      const saveResult = await saveResponse.json();
-
-      if (saveResult.code !== 1) {
-        throw new Error(saveResult.msg || '保存编辑文本失败');
-      }
-
-      // 2. 获取翻译结果
-      if (saveResult.data && saveResult.data.translateResultPath) {
-        currentTranslateResultPath = saveResult.data.translateResultPath;
-
-        const contentResponse = await fetch(`http://localhost:8080/ocr/translate/content?resultFilePath=${encodeURIComponent(currentTranslateResultPath)}`);
-        const contentResult = await contentResponse.json();
-
-        if (contentResult.code === 1) {
-          translationResult.textContent = contentResult.data;
-          console.log(contentResult);
-          showStatus(recognizeStatus, '翻译成功', 'success');
-
-          // 切换到翻译结果标签页
-          const translationTab = document.querySelector('.tab[data-tab="translation"]');
-          if (translationTab) {
-            translationTab.click();
-          } else {
-            console.error('翻译结果标签页不存在');
-          }
-        } else {
-          throw new Error(contentResult.msg || '获取翻译结果失败');
-        }
-      } else {
-        throw new Error('未返回翻译结果路径');
-      }
-    } catch (error) {
-      showStatus(recognizeStatus, '翻译失败: ' + error.message, 'error');
-      translationResult.textContent = '翻译过程中发生错误: ' + error.message;
-    }
-  });
-
-  function showStatus(element, message, type = '') {
-    element.textContent = message;
-    element.className = 'status';
-    if (type) {
-      element.classList.add(type);
-    }
-  }
-
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', function() {
-      // 移除所有tab和内容的active
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-      // 当前tab和对应内容加active
-      this.classList.add('active');
-      const tabName = this.getAttribute('data-tab');
-      document.getElementById(tabName + 'Tab').classList.add('active');
+    formData.append('image', imageInput.files[0]);
+    let uploadRes = await fetch('/ocr/upload', {
+      method: 'POST',
+      body: formData
     });
+    let uploadJson = await uploadRes.json();
+    if (uploadJson.code !== 1) {
+      alert(uploadJson.msg);
+      return;
+    }
+    let imageUrl = uploadJson.data.imageUrl;
+
+    // 调用识别
+    let recognizeRes = await fetch('/ocr/recognize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUrl, lang })
+    });
+    let recognizeJson = await recognizeRes.json();
+    if (recognizeJson.code !== 1) {
+      alert(recognizeJson.msg);
+      return;
+    }
+    let ocrResultFile = recognizeJson.data.ocr_result_txt;
+
+    // 获取识别内容
+    let contentRes = await fetch('/ocr/result/content?resultFilePath=' + encodeURIComponent(ocrResultFile));
+    let contentJson = await contentRes.json();
+    if (contentJson.code === 1) {
+      document.getElementById('ocrResult').value = contentJson.data;
+    } else {
+      document.getElementById('ocrResult').value = '';
+      alert(contentJson.msg);
+    }
   });
 </script>
 </body>
